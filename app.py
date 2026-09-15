@@ -2,205 +2,223 @@ import streamlit as st
 import requests
 import pandas as pd
 import numpy as np
+import plotly.graph_objects as go
 from datetime import datetime
 
-# Page Configuration - Pro Terminal Style
+# Page Configuration - Pro Exchange Layout
 st.set_page_config(
-    page_title="JUTT ON TOP | Pro Crypto Signal Terminal",
+    page_title="JUTT ON TOP | Pro Exchange Terminal",
     page_icon="⚡",
     layout="wide"
 )
 
-# Custom Pro Styling (TradingView / Binance Dark Theme)
+# Custom Dark Exchange Styling
 st.markdown("""
 <style>
     .stApp {
         background-color: #0b0e11;
         color: #eaecef;
     }
-    .header-banner {
-        background: linear-gradient(90deg, #1e2329 0%, #0b0e11 100%);
-        padding: 20px;
-        border-radius: 12px;
+    .top-header {
+        background: #1e2329;
+        padding: 12px 18px;
+        border-radius: 8px;
         border: 1px solid #2b313a;
-        margin-bottom: 20px;
-    }
-    .metric-box {
-        background-color: #1e2329;
-        padding: 16px;
-        border-radius: 10px;
-        border: 1px solid #2b313a;
-        text-align: center;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     .signal-buy {
         background: linear-gradient(135deg, #0ecb81 0%, #064e3b 100%);
         color: #ffffff;
-        padding: 22px;
-        border-radius: 12px;
+        padding: 18px;
+        border-radius: 10px;
         text-align: center;
-        font-size: 28px;
+        font-size: 22px;
         font-weight: 800;
-        box-shadow: 0 4px 20px rgba(14, 203, 129, 0.3);
-        margin: 15px 0;
+        box-shadow: 0 4px 15px rgba(14, 203, 129, 0.25);
     }
     .signal-sell {
         background: linear-gradient(135deg, #f6465d 0%, #7f1d1d 100%);
         color: #ffffff;
-        padding: 22px;
-        border-radius: 12px;
+        padding: 18px;
+        border-radius: 10px;
         text-align: center;
-        font-size: 28px;
+        font-size: 22px;
         font-weight: 800;
-        box-shadow: 0 4px 20px rgba(246, 70, 93, 0.3);
-        margin: 15px 0;
+        box-shadow: 0 4px 15px rgba(246, 70, 93, 0.25);
     }
-    .signal-neutral {
+    .signal-hold {
         background: linear-gradient(135deg, #f0b90b 0%, #78350f 100%);
         color: #ffffff;
-        padding: 22px;
-        border-radius: 12px;
+        padding: 18px;
+        border-radius: 10px;
         text-align: center;
-        font-size: 28px;
+        font-size: 22px;
         font-weight: 800;
-        box-shadow: 0 4px 20px rgba(240, 185, 11, 0.3);
-        margin: 15px 0;
+        box-shadow: 0 4px 15px rgba(240, 185, 11, 0.25);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Top Header
+# Header Bar
 now = datetime.now()
-st.markdown("""
-<div class="header-banner">
-    <h1 style="margin:0; color: #f0b90b; font-size: 32px;">⚡ JUTT ON TOP — Algorithmic Signal Terminal</h1>
-    <p style="margin: 5px 0 0 0; color: #848e9c;">Live Market Intelligence, RSI & EMA Momentum Analysis (A to Z Coins & Meme Coins)</p>
+st.markdown(f"""
+<div class="top-header">
+    <div>
+        <h2 style="margin:0; color: #f0b90b;">⚡ JUTT ON TOP — Live Exchange Terminal</h2>
+        <span style="color: #848e9c; font-size: 13px;">Real-Time Japanese Candlesticks | RSI & EMA Signal Engine</span>
+    </div>
+    <div style="text-align: right; color: #eaecef; font-size: 13px;">
+        📅 <b>{now.strftime('%A, %b %d, %Y')}</b><br>
+        ⏰ <b>{now.strftime('%I:%M:%S %p')}</b>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Live Status Bar
-col_t1, col_t2, col_t3 = st.columns(3)
-with col_t1:
-    st.caption(f"📅 **Date:** {now.strftime('%A, %B %d, %Y')}")
-with col_t2:
-    st.caption(f"⏰ **UTC/Local Time:** {now.strftime('%I:%M:%S %p')}")
-with col_t3:
-    st.caption("🟢 **Feed Status:** CoinGecko Live Stream Connected")
-
-# Fetch A to Z Coins List from CoinGecko
-@st.cache_data(ttl=1800)
-def get_all_coins():
+# Fetch USDT Symbols from Binance Vision API
+@st.cache_data(ttl=3600)
+def get_binance_symbols():
     try:
-        url = "https://api.coingecko.com/api/v3/coins/markets"
-        params = {
-            'vs_currency': 'usd',
-            'order': 'market_cap_desc',
-            'per_page': 150,
-            'page': 1,
-            'sparkline': 'false'
-        }
-        res = requests.get(url, params=params, timeout=10)
+        url = "https://data.api.binance.vision/api/v3/exchangeInfo"
+        res = requests.get(url, timeout=8)
         if res.status_code == 200:
             data = res.json()
-            return data
-    except Exception as e:
+            symbols = [s['symbol'] for s in data['symbols'] if s['quoteAsset'] == 'USDT' and s['status'] == 'TRADING']
+            return sorted(symbols)
+    except Exception:
         pass
-    return []
+    return ["BTCUSDT", "ETHUSDT", "DOGEUSDT", "PEPEUSDT", "SHIBUSDT", "SOLUSDT", "XRPUSDT"]
 
-coins_data = get_all_coins()
+symbols = get_binance_symbols()
+default_idx = symbols.index("DOGEUSDT") if "DOGEUSDT" in symbols else 0
 
-if coins_data:
-    # Create dictionary and formatted list for selection (Name + Symbol + Meme badge)
-    coin_options = {f"{c['name']} ({c['symbol'].upper()})": c['id'] for c in coins_data}
-    symbol_keys = list(coin_options.keys())
-    
-    # Default to Dogecoin or Bitcoin if available
-    default_index = 0
-    for idx, key in enumerate(symbol_keys):
-        if 'dogecoin' in coin_options[key] or 'bitcoin' in coin_options[key]:
-            default_index = idx
-            break
+# Selector Controls
+col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([2, 2, 1])
+with col_ctrl1:
+    selected_symbol = st.selectbox("🪙 Select Coin Pair (A-Z / Meme)", symbols, index=default_idx)
+with col_ctrl2:
+    selected_tf = st.selectbox("⏱️ Select Timeframe Schedule", ["1m", "3m", "5m", "15m", "30m", "1h", "4h", "1d"], index=3)
+with col_ctrl3:
+    st.write("")
+    st.write("")
+    refresh_btn = st.button("🔄 Refresh Data", use_container_width=True)
 
-    st.sidebar.header("🎯 Market Selector")
-    selected_label = st.sidebar.selectbox("Search & Select Coin (A - Z / Meme):", symbol_keys, index=default_index)
-    selected_coin_id = coin_options[selected_label]
-    
-    chart_days = st.sidebar.selectbox("Analysis Interval / Range", ["1", "7", "14"], index=0, format_func=lambda x: f"Last {x} Day(s)")
-
-    # Fetch Price History for Technical Analysis
-    @st.cache_data(ttl=60)
-    def get_coin_market_history(coin_id, days='1'):
-        url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
-        params = {'vs_currency': 'usd', 'days': days}
-        try:
-            r = requests.get(url, params=params, timeout=10)
-            if r.status_code == 200:
-                json_data = r.json()
-                prices = json_data.get('prices', [])
-                df = pd.DataFrame(prices, columns=['timestamp', 'price'])
-                df['price'] = df['price'].astype(float)
-                return df
-        except Exception:
-            return None
+# Fetch OHLC Candlestick Data
+@st.cache_data(ttl=30)
+def get_klines_data(symbol, interval, limit=120):
+    url = f"https://data.api.binance.vision/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+    try:
+        res = requests.get(url, timeout=8)
+        if res.status_code == 200:
+            raw = res.json()
+            df = pd.DataFrame(raw, columns=[
+                'open_time', 'open', 'high', 'low', 'close', 'volume',
+                'close_time', 'quote_vol', 'trades', 'tb_base_vol', 'tb_quote_vol', 'ignore'
+            ])
+            df['timestamp'] = pd.to_datetime(df['open_time'], unit='ms')
+            for col in ['open', 'high', 'low', 'close', 'volume']:
+                df[col] = df[col].astype(float)
+            return df
+    except Exception:
         return None
+    return None
 
-    df_history = get_coin_market_history(selected_coin_id, days=chart_days)
+df = get_klines_data(selected_symbol, selected_tf, limit=120)
 
-    if df_history is not None and len(df_history) > 14:
-        # Calculate RSI (14)
-        delta = df_history['price'].diff()
-        gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-        loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-        rs = gain / loss
-        df_history['RSI'] = 100 - (100 / (1 + rs))
+if df is not None and len(df) > 20:
+    # Calculate RSI (14)
+    delta = df['close'].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(14).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
+    rs = gain / loss
+    df['RSI'] = 100 - (100 / (1 + rs))
 
-        # Calculate EMAs
-        df_history['EMA_10'] = df_history['price'].ewm(span=10, adjust=False).mean()
-        df_history['EMA_20'] = df_history['price'].ewm(span=20, adjust=False).mean()
+    # Calculate EMA 10 & EMA 20
+    df['EMA_10'] = df['close'].ewm(span=10, adjust=False).mean()
+    df['EMA_20'] = df['close'].ewm(span=20, adjust=False).mean()
 
-        current_price = df_history['price'].iloc[-1]
-        start_price = df_history['price'].iloc[0]
-        change_24h = ((current_price - start_price) / start_price) * 100
-        current_rsi = df_history['RSI'].iloc[-1]
-        ema_10 = df_history['EMA_10'].iloc[-1]
-        ema_20 = df_history['EMA_20'].iloc[-1]
+    curr_close = df['close'].iloc[-1]
+    prev_close = df['close'].iloc[-2]
+    pct_change = ((curr_close - prev_close) / prev_close) * 100
+    curr_rsi = df['RSI'].iloc[-1]
+    curr_ema10 = df['EMA_10'].iloc[-1]
+    curr_ema20 = df['EMA_20'].iloc[-1]
 
-        # Top Metric Cards
-        m1, m2, m3, m4 = st.columns(4)
-        with m1:
-            st.markdown(f'<div class="metric-box"><h4>Selected Asset</h4><h2>{selected_label.split("(")[0]}</h2></div>', unsafe_allow_html=True)
-        with m2:
-            st.markdown(f'<div class="metric-box"><h4>Live Price (USD)</h4><h2>${current_price:,.6f}</h2><span style="color:{"#0ecb81" if change_24h>=0 else "#f6465d"}">{change_24h:+.2f}%</span></div>', unsafe_allow_html=True)
-        with m3:
-            st.markdown(f'<div class="metric-box"><h4>RSI (14) Momentum</h4><h2>{current_rsi:.2f}</h2></div>', unsafe_allow_html=True)
-        with m4:
-            trend_lbl = "BULLISH 🟢" if ema_10 > ema_20 else "BEARISH 🔴"
-            st.markdown(f'<div class="metric-box"><h4>Trend Structure</h4><h2>{trend_lbl}</h2></div>', unsafe_allow_html=True)
+    # Quick Metrics Row
+    m1, m2, m3, m4 = st.columns(4)
+    with m1:
+        st.metric("Pair", selected_symbol)
+    with m2:
+        st.metric("Live Candle Close", f"${curr_close:,.6f}" if curr_close < 1 else f"${curr_close:,.2f}", f"{pct_change:+.2f}%")
+    with m3:
+        st.metric("RSI (14)", f"{curr_rsi:.2f}")
+    with m4:
+        trend_label = "BULLISH 🟢" if curr_ema10 > curr_ema20 else "BEARISH 🔴"
+        st.metric("EMA Trend", trend_label)
 
-        # Algorithmic Signal Engine
-        if current_rsi < 38 and ema_10 >= ema_20:
-            signal_title = "🚀 STRONG BUY SIGNAL — NOW IS THE TIME TO LONG / BUY"
-            signal_class = "signal-buy"
-            signal_desc = f"RSI is oversold ({current_rsi:.2f} < 38) with bullish EMA crossover confirmation."
-        elif current_rsi > 62 and ema_10 <= ema_20:
-            signal_title = "⚠️ STRONG SELL SIGNAL — CONSIDER EXIT / SHORT"
-            signal_class = "signal-sell"
-            signal_desc = f"RSI is overbought ({current_rsi:.2f} > 62) with bearish EMA rejection."
-        else:
-            signal_title = "⏸️ HOLD / NEUTRAL MARKET — WAIT FOR BREAKOUT"
-            signal_class = "signal-neutral"
-            signal_desc = f"Market is balanced (RSI: {current_rsi:.2f}). Wait for clear momentum confirmation."
-
-        st.markdown(f'<div class="{signal_class}">{signal_title}</div>', unsafe_allow_html=True)
-        st.info(f"📊 **Signal Diagnostic:** {signal_desc} | **Exact Timestamp:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} PKT")
-
-        # Interactive Price & EMA Chart
-        st.markdown("### 📈 Live Price Action & Exponential Moving Averages")
-        chart_df = df_history[['price', 'EMA_10', 'EMA_20']].copy()
-        chart_df.columns = ['Price (USD)', 'EMA 10', 'EMA 20']
-        st.line_chart(chart_df, height=380)
-
+    # Signal Generation Logic for Selected Timeframe
+    if curr_rsi < 36 and curr_ema10 >= curr_ema20:
+        sig_text = f"🚀 STRONG BUY SIGNAL ({selected_tf.upper()} TIMEFRAME) — PRICE LIKELY TO PUMP UP!"
+        sig_class = "signal-buy"
+        reason = f"RSI is oversold ({curr_rsi:.1f}) and short EMA is above long EMA on {selected_tf} chart."
+    elif curr_rsi > 64 and curr_ema10 <= curr_ema20:
+        sig_text = f"⚠️ STRONG SELL SIGNAL ({selected_tf.upper()} TIMEFRAME) — PRICE LIKELY TO DUMP DOWN!"
+        sig_class = "signal-sell"
+        reason = f"RSI is overbought ({curr_rsi:.1f}) with bearish EMA rejection on {selected_tf} chart."
     else:
-        st.warning("Loading real-time price tick history...")
+        sig_text = f"⏸️ HOLD / RANGE MARKET ({selected_tf.upper()} TIMEFRAME)"
+        sig_class = "signal-hold"
+        reason = f"Balanced momentum (RSI: {curr_rsi:.1f}). Awaiting breakout confirmation on {selected_tf}."
+
+    st.markdown(f'<div class="{sig_class}">{sig_text}</div>', unsafe_allow_html=True)
+    st.info(f"📊 **Bot Analysis Note:** {reason}")
+
+    # Plotly Japanese Candlestick Chart with EMAs
+    fig = go.Figure()
+
+    # Candlestick Trace
+    fig.add_trace(go.Candlestick(
+        x=df['timestamp'],
+        open=df['open'],
+        high=df['high'],
+        low=df['low'],
+        close=df['close'],
+        name='OHLC Candles',
+        increasing_line_color='#0ecb81',
+        decreasing_line_color='#f6465d'
+    ))
+
+    # EMA 15 Line
+    fig.add_trace(go.Scatter(
+        x=df['timestamp'],
+        y=df['EMA_10'],
+        mode='lines',
+        name='EMA 10',
+        line=dict(color='#f0b90b', width=1.5)
+    ))
+
+    # EMA 20 Line
+    fig.add_trace(go.Scatter(
+        x=df['timestamp'],
+        y=df['EMA_20'],
+        mode='lines',
+        name='EMA 20',
+        line=dict(color='#3575ef', width=1.5)
+    ))
+
+    fig.update_layout(
+        template='plotly_dark',
+        height=450,
+        margin=dict(l=10, r=10, t=30, b=10),
+        xaxis_rangeslider_visible=False,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        paper_bgcolor='#0b0e11',
+        plot_bgcolor='#0b0e11'
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 else:
-    st.error("Unable to load coin market data. Please refresh the page.")
+    st.error("Market candle data load nahi ho pa raha. Kripya coin ya timeframe change kar ke dobara try karein.")
