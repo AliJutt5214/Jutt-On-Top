@@ -9,14 +9,16 @@ st.set_page_config(
 
 hide_streamlit_style = """
 <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    #MainMenu {visibility: hidden; display: none !important;}
+    footer {visibility: hidden; display: none !important;}
+    header {visibility: hidden; display: none !important;}
     .stDeployButton {display: none !important;}
     [data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
     div[data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
     div[data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
     .viewerBadge_container__1QSob {visibility: hidden !important; display: none !important;}
+    a[href*="streamlit.io"] {display: none !important;}
+    div[class*="viewerBadge"] {display: none !important;}
     .block-container {
         padding-top: 0rem;
         padding-bottom: 0rem;
