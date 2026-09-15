@@ -5,9 +5,9 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
 
-# Page Configuration
+# Page Configuration - Pro Exchange Layout
 st.set_page_config(
-    page_title="JUTT ON TOP | Binance Live Terminal",
+    page_title="JUTT ON TOP | Live Exchange Terminal",
     page_icon="⚡",
     layout="wide"
 )
@@ -84,65 +84,71 @@ col_h1, col_h2 = st.columns([3, 1])
 with col_h1:
     st.markdown("""
     <div>
-        <h2 style="margin:0; color: #f0b90b;">⚡ JUTT ON TOP — Binance Live Terminal</h2>
+        <h2 style="margin:0; color: #f0b90b;">⚡ JUTT ON TOP — Live Exchange Terminal</h2>
         <span style="color: #848e9c; font-size: 13px;">Real-Time Japanese Candlesticks | RSI & EMA Signal Engine</span>
     </div>
     """, unsafe_allow_html=True)
 with col_h2:
     components.html(clock_html, height=55)
 
-symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT", "PEPEUSDT", "SHIBUSDT", "XRPUSDT", "BNBUSDT"]
+symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT", "PEPEUSDT", "SHIBUSDT", "XRPUSDT"]
+tf_map = {
+    "1m": "1",
+    "3m": "3",
+    "5m": "5",
+    "15m": "15",
+    "30m": "30",
+    "1h": "60",
+    "4h": "240",
+    "1d": "D"
+}
 
 col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([2, 2, 1])
 with col_ctrl1:
-    selected_symbol = st.selectbox("🪙 Select Binance Coin Pair", symbols, index=4) # Default PEPEUSDT
+    selected_symbol = st.selectbox("🪙 Select Coin Pair", symbols, index=4)
 with col_ctrl2:
-    selected_tf = st.selectbox("⏱️ Select Timeframe Schedule", ["1m", "3m", "5m", "15m", "30m", "1h", "4h", "1d"], index=2)
+    selected_tf_label = st.selectbox("⏱️ Select Timeframe Schedule", list(tf_map.keys()), index=3)
 with col_ctrl3:
     st.write("")
     st.write("")
     refresh_btn = st.button("🔄 Refresh Data", use_container_width=True)
 
-# Direct Binance Public API Klines Fetcher with Headers
+bybit_tf = tf_map[selected_tf_label]
+
 @st.cache_data(ttl=15)
-def get_binance_klines(symbol, interval, limit=120):
-    url = f"https://api.binance.com/api/v3/klines"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-    }
+def get_bybit_klines(symbol, interval, limit=120):
+    url = "https://api.bybit.com/v5/market/kline"
     params = {
+        'category': 'spot',
         'symbol': symbol,
         'interval': interval,
         'limit': limit
     }
     try:
-        response = requests.get(url, headers=headers, params=params, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            df = pd.DataFrame(data, columns=[
-                'timestamp', 'open', 'high', 'low', 'close', 'volume',
-                'close_time', 'quote_asset_volume', 'number_of_trades',
-                'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
-            ])
-            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-            for col in ['open', 'high', 'low', 'close', 'volume']:
-                df[col] = df[col].astype(float)
-            return df
-    except Exception as e:
+        res = requests.get(url, params=params, timeout=10)
+        if res.status_code == 200:
+            data = res.json()
+            if data.get('retCode') == 0 and 'list' in data.get('result', {}):
+                raw_list = data['result']['list']
+                raw_list.reverse() # Oldest to newest
+                df = pd.DataFrame(raw_list, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover'])
+                df['timestamp'] = pd.to_datetime(df['timestamp'].astype(float), unit='ms')
+                for col in ['open', 'high', 'low', 'close', 'volume']:
+                    df[col] = df[col].astype(float)
+                return df
+    except Exception:
         pass
     return None
 
-df = get_binance_klines(selected_symbol, selected_tf, limit=120)
+df = get_bybit_klines(selected_symbol, bybit_tf, limit=120)
 
 if df is not None and len(df) > 20:
-    # Calculate RSI (14)
     delta = df['close'].diff()
     gain = (delta.where(delta > 0, 0)).rolling(14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
     rs = gain / loss
     df['RSI'] = 100 - (100 / (1 + rs))
 
-    # Calculate EMA 10 & EMA 20
     df['EMA_10'] = df['close'].ewm(span=10, adjust=False).mean()
     df['EMA_20'] = df['close'].ewm(span=20, adjust=False).mean()
 
@@ -153,7 +159,6 @@ if df is not None and len(df) > 20:
     curr_ema10 = df['EMA_10'].iloc[-1]
     curr_ema20 = df['EMA_20'].iloc[-1]
 
-    # Quick Metrics Row
     m1, m2, m3, m4 = st.columns(4)
     with m1:
         st.metric("Pair", selected_symbol)
@@ -166,24 +171,22 @@ if df is not None and len(df) > 20:
         trend_label = "BULLISH 🟢" if curr_ema10 > curr_ema20 else "BEARISH 🔴"
         st.metric("EMA Trend", trend_label)
 
-    # Signal Generation Logic
     if curr_rsi < 38 and curr_ema10 >= curr_ema20:
-        sig_text = f"🚀 STRONG BUY SIGNAL ({selected_tf.upper()} TIMEFRAME) — PRICE LIKELY TO PUMP UP!"
+        sig_text = f"🚀 STRONG BUY SIGNAL ({selected_tf_label.upper()} TIMEFRAME) — PRICE LIKELY TO PUMP UP!"
         sig_class = "signal-buy"
         reason = f"RSI is oversold ({curr_rsi:.1f}) and short EMA is above long EMA."
     elif curr_rsi > 62 and curr_ema10 <= curr_ema20:
-        sig_text = f"⚠️ STRONG SELL SIGNAL ({selected_tf.upper()} TIMEFRAME) — PRICE LIKELY TO DUMP DOWN!"
+        sig_text = f"⚠️ STRONG SELL SIGNAL ({selected_tf_label.upper()} TIMEFRAME) — PRICE LIKELY TO DUMP DOWN!"
         sig_class = "signal-sell"
         reason = f"RSI is overbought ({curr_rsi:.1f}) with bearish EMA rejection."
     else:
-        sig_text = f"⏸️ HOLD / RANGE MARKET ({selected_tf.upper()} TIMEFRAME)"
+        sig_text = f"⏸️ HOLD / RANGE MARKET ({selected_tf_label.upper()} TIMEFRAME)"
         sig_class = "signal-hold"
         reason = f"Balanced momentum (RSI: {curr_rsi:.1f}). Awaiting breakout confirmation."
 
     st.markdown(f'<div class="{sig_class}">{sig_text}</div>', unsafe_allow_html=True)
     st.info(f"📊 **Bot Analysis Note:** {reason}")
 
-    # Plotly Japanese Candlestick Chart
     fig = go.Figure()
 
     fig.add_trace(go.Candlestick(
