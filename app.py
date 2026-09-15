@@ -58,15 +58,6 @@ html_code = """
             border: 1px solid #2b313a;
             margin-bottom: 10px;
         }
-        .logo-title h2 {
-            color: #f0b90b;
-            font-size: 16px;
-            font-weight: 700;
-        }
-        .logo-title span {
-            color: #848e9c;
-            font-size: 10px;
-        }
         .clock-box {
             text-align: right;
             font-size: 11px;
@@ -207,24 +198,39 @@ html_code = """
 
     <div class="header">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" width="130" height="42">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 130" width="220" height="74">
               <defs>
-                <linearGradient id="goldGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#fffbbf"/>
-                  <stop offset="100%" stop-color="#f0b90b"/>
+                <linearGradient id="gold3D" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#fffdf0"/>
+                  <stop offset="15%" stop-color="#fde047"/>
+                  <stop offset="50%" stop-color="#ca8a04"/>
+                  <stop offset="85%" stop-color="#854d0e"/>
+                  <stop offset="100%" stop-color="#422006"/>
                 </linearGradient>
-                <linearGradient id="greenGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#0ecb81"/>
-                  <stop offset="100%" stop-color="#064e3b"/>
+                <linearGradient id="silver3D" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#ffffff"/>
+                  <stop offset="40%" stop-color="#e5e7eb"/>
+                  <stop offset="100%" stop-color="#9ca3af"/>
                 </linearGradient>
+                <radialGradient id="glow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                  <stop offset="0%" stop-color="#fde047" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#ca8a04" stop-opacity="0"/>
+                </radialGradient>
               </defs>
-              <polygon points="40,8 68,24 68,56 40,72 12,56 12,24" fill="#1e2329" stroke="#f0b90b" stroke-width="2.5"/>
-              <polygon points="40,14 62,27 62,53 40,66 18,53 18,27" fill="#0b0e11"/>
-              <path d="M44 23 L31 43 H43 L37 57 L52 35 H39 L44 23 Z" fill="url(#goldGlow)"/>
-              <path d="M14 55 Q 26 40, 35 48 T 62 20" fill="none" stroke="#0ecb81" stroke-width="2.5" stroke-linecap="round"/>
-              <circle cx="62" cy="20" r="3.5" fill="#0ecb81"/>
-              <text x="78" y="34" fill="#f0b90b" font-family="-apple-system, sans-serif" font-weight="800" font-size="16" letter-spacing="1">JUTT BOT</text>
-              <text x="78" y="52" fill="#0ecb81" font-family="-apple-system, sans-serif" font-weight="700" font-size="11" letter-spacing="2">PRO TERMINAL</text>
+              <circle cx="50" cy="50" r="42" fill="#1f1f1f" stroke="url(#gold3D)" stroke-width="4"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#fef08a" stroke-width="1.5" opacity="0.4"/>
+              <ellipse cx="50" cy="50" r="30" fill="url(#glow)"/>
+              <rect x="38" y="38" width="6" height="20" fill="url(#gold3D)" rx="2"/>
+              <line x1="41" y1="34" x2="41" y2="64" stroke="url(#gold3D)" stroke-width="3" stroke-linecap="round"/>
+              <rect x="52" y="28" width="6" height="30" fill="url(#gold3D)" rx="2"/>
+              <line x1="55" y1="24" x2="55" y2="64" stroke="url(#gold3D)" stroke-width="3" stroke-linecap="round"/>
+              <path d="M28 70 Q 45 42, 66 54 T 84 30" fill="none" stroke="#15803d" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+              <polygon points="84,30 80,42 92,40" fill="#16a34a"/>
+              <path d="M185 2 L197 18 L209 2 L221 18 L233 2 V26 H185 Z" fill="url(#gold3D)" filter="drop-shadow(0 0 3px #fde047)"/>
+              <text x="145" y="56" fill="url(#gold3D)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="36" letter-spacing="2">JUTT</text>
+              <text x="238" y="56" fill="url(#silver3D)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="36" letter-spacing="2">BOT</text>
+              <text x="210" y="78" fill="#e5e7eb" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="12" text-anchor="middle" letter-spacing="4">PRO TRADER</text>
+              <text x="215" y="108" fill="url(#gold3D)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="10" text-anchor="middle" letter-spacing="2">ANALYZE  |  SIGNAL  |  TRADE  |  GROW</text>
             </svg>
         </div>
         <div class="clock-box" id="liveClock">00:00:00 AM</div>
