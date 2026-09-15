@@ -12,6 +12,11 @@ hide_streamlit_style = """
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
+    .stDeployButton {display: none !important;}
+    [data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
+    div[data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
+    div[data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
+    .viewerBadge_container__1QSob {visibility: hidden !important; display: none !important;}
     .block-container {
         padding-top: 0rem;
         padding-bottom: 0rem;
@@ -387,7 +392,6 @@ html_code = """
         let prices = [];
         let basePrice = 1.0850;
 
-        // Base prices for forex pairs
         const basePrices = {
             'EURUSD': 1.0854,
             'GBPUSD': 1.2685,
@@ -411,7 +415,6 @@ html_code = """
             marketChart.update();
         }
 
-        // Initialize chart data
         for(let i=0; i<30; i++) {
             basePrice += (Math.random() - 0.49) * 0.0003;
             prices.push(parseFloat(basePrice.toFixed(5)));
@@ -446,7 +449,6 @@ html_code = """
             }
         });
 
-        // Calculate Real RSI (14) function
         function calculateRSI(dataArr) {
             if (dataArr.length < 15) return 50.0;
             let gains = 0;
@@ -464,10 +466,8 @@ html_code = """
             return parseFloat(rsi.toFixed(1));
         }
 
-        // Live real-time market tick simulator synced with live open exchange rates
         async function fetchRealMarketTick() {
             try {
-                // Fetch live Forex exchange rate from public live API
                 let res = await fetch(`https://open.er-api.com/v6/latest/USD`);
                 let data = await res.json();
                 let liveRate = basePrice;
@@ -478,7 +478,6 @@ html_code = """
                     if (currentPair === 'AUDUSD' && data.rates.AUD) liveRate = 1 / data.rates.AUD;
                     if (currentPair === 'USDCAD' && data.rates.CAD) liveRate = data.rates.CAD;
                 }
-                // Add micro tick fluctuation
                 liveRate = liveRate + (Math.random() - 0.495) * 0.0002;
                 return parseFloat(liveRate.toFixed(5));
             } catch (e) {
@@ -551,7 +550,6 @@ html_code = """
                 spinner.style.display = 'none';
                 card.style.display = 'block';
 
-                // Real technical calculation based on actual RSI and price action
                 let rsiVal = calculateRSI(prices);
                 let priceDiff = prices[prices.length - 1] - prices[prices.length - 6];
                 let type, cls, win, reason;
@@ -586,7 +584,6 @@ html_code = """
                 reasonBox.innerHTML = `🧠 <b>Jutt Bot Technical Analysis:</b> ${reason}`;
                 marketChart.update();
 
-                // Add to history table
                 const tableBody = document.querySelector('#historyTable tbody');
                 const nowStr = new Date().toTimeString().split(' ')[0];
                 const newRow = document.createElement('tr');
