@@ -1,11 +1,11 @@
 import streamlit as st
-import requests
+import yfinance as yf
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
 
-# Page Configuration - Pro Exchange Layout
+# Page Configuration
 st.set_page_config(
     page_title="JUTT ON TOP | Live Exchange Terminal",
     page_icon="⚡",
@@ -91,58 +91,55 @@ with col_h1:
 with col_h2:
     components.html(clock_html, height=55)
 
-symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT", "PEPEUSDT", "SHIBUSDT", "XRPUSDT"]
-tf_map = {
-    "1m": "1",
-    "3m": "3",
-    "5m": "5",
-    "15m": "15",
-    "30m": "30",
-    "1h": "60",
-    "4h": "240",
-    "1d": "D"
+ticker_map = {
+    "BTCUSDT": "BTC-USD",
+    "ETHUSDT": "ETH-USD",
+    "SOLUSDT": "SOL-USD",
+    "DOGEUSDT": "DOGE-USD",
+    "XRPUSDT": "XRP-USD",
+    "SHIBUSDT": "SHIB-USD"
 }
+
+symbols = list(ticker_map.keys())
 
 col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([2, 2, 1])
 with col_ctrl1:
-    selected_symbol = st.selectbox("🪙 Select Coin Pair", symbols, index=4)
+    selected_symbol = st.selectbox("🪙 Select Coin Pair", symbols, index=0)
 with col_ctrl2:
-    selected_tf_label = st.selectbox("⏱️ Select Timeframe Schedule", list(tf_map.keys()), index=3)
+    selected_tf = st.selectbox("⏱️ Select Timeframe Schedule", ["5m", "15m", "1h", "1d"], index=1)
 with col_ctrl3:
     st.write("")
     st.write("")
     refresh_btn = st.button("🔄 Refresh Data", use_container_width=True)
 
-bybit_tf = tf_map[selected_tf_label]
+yf_ticker = ticker_map[selected_symbol]
+interval_map = {"5m": "5m", "15m": "15m", "1h": "1h", "1d": "1d"}
+period_map = {"5m": "5d", "15m": "5d", "1h": "1mo", "1d": "6mo"}
 
-@st.cache_data(ttl=15)
-def get_bybit_klines(symbol, interval, limit=120):
-    url = "https://api.bybit.com/v5/market/kline"
-    params = {
-        'category': 'spot',
-        'symbol': symbol,
-        'interval': interval,
-        'limit': limit
-    }
+@st.cache_data(ttl=20)
+def get_yf_data(ticker, interval, period):
     try:
-        res = requests.get(url, params=params, timeout=10)
-        if res.status_code == 200:
-            data = res.json()
-            if data.get('retCode') == 0 and 'list' in data.get('result', {}):
-                raw_list = data['result']['list']
-                raw_list.reverse() # Oldest to newest
-                df = pd.DataFrame(raw_list, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover'])
-                df['timestamp'] = pd.to_datetime(df['timestamp'].astype(float), unit='ms')
-                for col in ['open', 'high', 'low', 'close', 'volume']:
-                    df[col] = df[col].astype(float)
-                return df
+        df = yf.Ticker(ticker).history(period=period, interval=interval)
+        if not df.empty:
+            df.reset_index(inplace=True)
+            # Rename columns to standard lowercase
+            df.rename(columns={
+                'Datetime': 'timestamp',
+                'Date': 'timestamp',
+                'Open': 'open',
+                'High': 'high',
+                'Low': 'low',
+                'Close': 'close',
+                'Volume': 'volume'
+            }, inplace=True)
+            return df
     except Exception:
         pass
     return None
 
-df = get_bybit_klines(selected_symbol, bybit_tf, limit=120)
+df = get_yf_data(yf_ticker, interval_map[selected_tf], period_map[selected_tf])
 
-if df is not None and len(df) > 20:
+if df is not None and len(df) > 15:
     delta = df['close'].diff()
     gain = (delta.where(delta > 0, 0)).rolling(14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
@@ -172,15 +169,15 @@ if df is not None and len(df) > 20:
         st.metric("EMA Trend", trend_label)
 
     if curr_rsi < 38 and curr_ema10 >= curr_ema20:
-        sig_text = f"🚀 STRONG BUY SIGNAL ({selected_tf_label.upper()} TIMEFRAME) — PRICE LIKELY TO PUMP UP!"
+        sig_text = f"🚀 STRONG BUY SIGNAL ({selected_tf.upper()} TIMEFRAME) — PRICE LIKELY TO PUMP UP!"
         sig_class = "signal-buy"
         reason = f"RSI is oversold ({curr_rsi:.1f}) and short EMA is above long EMA."
     elif curr_rsi > 62 and curr_ema10 <= curr_ema20:
-        sig_text = f"⚠️ STRONG SELL SIGNAL ({selected_tf_label.upper()} TIMEFRAME) — PRICE LIKELY TO DUMP DOWN!"
+        sig_text = f"⚠️ STRONG SELL SIGNAL ({selected_tf.upper()} TIMEFRAME) — PRICE LIKELY TO DUMP DOWN!"
         sig_class = "signal-sell"
         reason = f"RSI is overbought ({curr_rsi:.1f}) with bearish EMA rejection."
     else:
-        sig_text = f"⏸️ HOLD / RANGE MARKET ({selected_tf_label.upper()} TIMEFRAME)"
+        sig_text = f"⏸️ HOLD / RANGE MARKET ({selected_tf.upper()} TIMEFRAME)"
         sig_class = "signal-hold"
         reason = f"Balanced momentum (RSI: {curr_rsi:.1f}). Awaiting breakout confirmation."
 
