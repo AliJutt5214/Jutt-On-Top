@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(
-    page_title="INDIAN BOT PRO — Quotex Binary AI Terminal",
+    page_title="JUTT BOT PRO — Quotex Binary AI Terminal",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -29,7 +29,7 @@ html_code = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INDIAN BOT PRO — Quotex Binary AI Terminal</title>
+    <title>JUTT BOT PRO — Quotex Binary AI Terminal</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -206,9 +206,26 @@ html_code = """
 <body>
 
     <div class="header">
-        <div class="logo-title">
-            <h2>⚡ INDIAN BOT PRO</h2>
-            <span>Quotex & Binary AI Signal Terminal</span>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" width="130" height="42">
+              <defs>
+                <linearGradient id="goldGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#fffbbf"/>
+                  <stop offset="100%" stop-color="#f0b90b"/>
+                </linearGradient>
+                <linearGradient id="greenGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#0ecb81"/>
+                  <stop offset="100%" stop-color="#064e3b"/>
+                </linearGradient>
+              </defs>
+              <polygon points="40,8 68,24 68,56 40,72 12,56 12,24" fill="#1e2329" stroke="#f0b90b" stroke-width="2.5"/>
+              <polygon points="40,14 62,27 62,53 40,66 18,53 18,27" fill="#0b0e11"/>
+              <path d="M44 23 L31 43 H43 L37 57 L52 35 H39 L44 23 Z" fill="url(#goldGlow)"/>
+              <path d="M14 55 Q 26 40, 35 48 T 62 20" fill="none" stroke="#0ecb81" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="62" cy="20" r="3.5" fill="#0ecb81"/>
+              <text x="78" y="34" fill="#f0b90b" font-family="-apple-system, sans-serif" font-weight="800" font-size="16" letter-spacing="1">JUTT BOT</text>
+              <text x="78" y="52" fill="#0ecb81" font-family="-apple-system, sans-serif" font-weight="700" font-size="11" letter-spacing="2">PRO TERMINAL</text>
+            </svg>
         </div>
         <div class="clock-box" id="liveClock">00:00:00 AM</div>
     </div>
@@ -255,7 +272,7 @@ html_code = """
 
     <div class="spinner-box" id="spinnerBox">
         <div class="spinner"></div>
-        <div>🤖 Indian Bot scanning Tick Microstructure & Order Flow...</div>
+        <div>🤖 Jutt Bot scanning Tick Microstructure & Order Flow...</div>
     </div>
 
     <div class="signal-card" id="signalCard">
@@ -268,7 +285,7 @@ html_code = """
     </div>
 
     <div class="reason-box" id="reasonBox">
-        🧠 <b>Confluence Log:</b> Ready for scan. Click "GENERATE AI SIGNAL" above.
+        🧠 <b>Jutt Bot Confluence:</b> Ready for scan. Click "GENERATE AI SIGNAL" above.
     </div>
 
     <script>
@@ -365,7 +382,7 @@ html_code = """
                 card.className = `signal-card ${cls}`;
                 document.getElementById('signalTitle').innerText = type;
                 document.getElementById('signalSub').innerText = `Win Probability: ${win}% | Expiry Time: ${expiry}`;
-                reasonBox.innerHTML = `🧠 <b>Indian Bot Confluence:</b> ${reason}`;
+                reasonBox.innerHTML = `🧠 <b>Jutt Bot Confluence:</b> ${reason}`;
                 marketChart.update();
             }, 3000);
         }
