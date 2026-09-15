@@ -1,10 +1,35 @@
+import streamlit as st
+import streamlit.components.v1 as components
+
+st.set_page_config(
+    page_title="INDIAN BOT PRO — Quotex Binary AI Terminal",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# Hide Streamlit default header/footer for clean mobile view
+hide_streamlit_style = """
+<style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .block-container {
+        padding-top: 0rem;
+        padding-bottom: 0rem;
+        padding-left: 0rem;
+        padding-right: 0rem;
+    }
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+html_code = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>INDIAN BOT PRO — Quotex Binary AI Terminal</title>
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -347,3 +372,6 @@
     </script>
 </body>
 </html>
+"""
+
+components.html(html_code, height=650, scrolling=True)
