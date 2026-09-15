@@ -4,17 +4,21 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
+from PIL import Image
 
-# Page Configuration
+# Page Configuration with Pro Logo/Icon
 st.set_page_config(
     page_title="JUTT ON TOP | Live Exchange Terminal",
-    page_icon="⚡",
+    page_icon="logo.png",
     layout="wide"
 )
 
-# Custom Dark Exchange Styling
+# Custom Dark Exchange Styling & Hide Streamlit Footer/Toolbar
 st.markdown("""
 <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     .stApp {
         background-color: #0b0e11;
         color: #eaecef;
@@ -32,30 +36,30 @@ st.markdown("""
     .signal-buy {
         background: linear-gradient(135deg, #0ecb81 0%, #064e3b 100%);
         color: #ffffff;
-        padding: 18px;
+        padding: 16px;
         border-radius: 10px;
         text-align: center;
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 800;
         box-shadow: 0 4px 15px rgba(14, 203, 129, 0.25);
     }
     .signal-sell {
         background: linear-gradient(135deg, #f6465d 0%, #7f1d1d 100%);
         color: #ffffff;
-        padding: 18px;
+        padding: 16px;
         border-radius: 10px;
         text-align: center;
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 800;
         box-shadow: 0 4px 15px rgba(246, 70, 93, 0.25);
     }
     .signal-hold {
         background: linear-gradient(135deg, #f0b90b 0%, #78350f 100%);
         color: #ffffff;
-        padding: 18px;
+        padding: 16px;
         border-radius: 10px;
         text-align: center;
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 800;
         box-shadow: 0 4px 15px rgba(240, 185, 11, 0.25);
     }
@@ -80,11 +84,17 @@ updateClock();
 </script>
 """
 
-col_h1, col_h2 = st.columns([3, 1])
+col_logo, col_h1, col_h2 = st.columns([0.8, 3.2, 1.2])
+with col_logo:
+    try:
+        logo_img = Image.open("logo.png")
+        st.image(logo_img, width=80)
+    except Exception:
+        st.write("🚀")
 with col_h1:
     st.markdown("""
     <div>
-        <h2 style="margin:0; color: #f0b90b;">⚡ JUTT ON TOP — Live Exchange Terminal</h2>
+        <h2 style="margin:0; color: #f0b90b;">🚀 JUTT ON TOP — Pro Terminal</h2>
         <span style="color: #848e9c; font-size: 13px;">Real-Time Japanese Candlesticks | RSI & EMA Signal Engine</span>
     </div>
     """, unsafe_allow_html=True)
@@ -96,15 +106,20 @@ ticker_map = {
     "ETHUSDT": "ETH-USD",
     "SOLUSDT": "SOL-USD",
     "DOGEUSDT": "DOGE-USD",
-    "XRPUSDT": "XRP-USD",
-    "SHIBUSDT": "SHIB-USD"
+    "SHIBUSDT": "SHIB-USD",
+    "PEPEUSDT": "PEPE-USD",
+    "FLOKIUSDT": "FLOKI-USD",
+    "BONKUSDT": "BONK-USD",
+    "WIFUSDT": "WIF-USD",
+    "MEMEUSDT": "MEME-USD",
+    "XRPUSDT": "XRP-USD"
 }
 
 symbols = list(ticker_map.keys())
 
 col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([2, 2, 1])
 with col_ctrl1:
-    selected_symbol = st.selectbox("🪙 Select Coin Pair", symbols, index=0)
+    selected_symbol = st.selectbox("🪙 Select Coin Pair", symbols, index=5)
 with col_ctrl2:
     selected_tf = st.selectbox("⏱️ Select Timeframe Schedule", ["5m", "15m", "1h", "1d"], index=1)
 with col_ctrl3:
@@ -122,7 +137,6 @@ def get_yf_data(ticker, interval, period):
         df = yf.Ticker(ticker).history(period=period, interval=interval)
         if not df.empty:
             df.reset_index(inplace=True)
-            # Rename columns to standard lowercase
             df.rename(columns={
                 'Datetime': 'timestamp',
                 'Date': 'timestamp',
@@ -218,12 +232,13 @@ if df is not None and len(df) > 15:
         height=450,
         margin=dict(l=10, r=10, t=30, b=10),
         xaxis_rangeslider_visible=False,
+        dragmode=False,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         paper_bgcolor='#0b0e11',
         plot_bgcolor='#0b0e11'
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 else:
     st.error("Market candle data load nahi ho pa raha. Kripya coin change kar ke dobara try karein.")
