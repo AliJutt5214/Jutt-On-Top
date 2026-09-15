@@ -1,154 +1,179 @@
-import ccxt
+import streamlit as st
+import requests
 import pandas as pd
 import numpy as np
-import streamlit as st
+from datetime import datetime
 
-# Page Config
-st.set_page_config(page_title="Jutt On Top", page_icon="⚡", layout="centered")
+# Page Configuration
+st.set_page_config(
+    page_title="Jutt On Top - Live Signal Bot",
+    page_icon="⚡",
+    layout="wide"
+)
 
-st.title("⚡ Jutt On Top — Binance AI Signal Bot")
-st.markdown("Real-time technical analysis & trading signals dashboard")
+# Custom CSS for Professional Look
+st.markdown("""
+<style>
+    .main {
+        background-color: #0e1117;
+    }
+    .metric-card {
+        background-color: #1f2937;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px: solid #374151;
+        text-align: center;
+    }
+    .buy-signal {
+        background-color: #064e3b;
+        color: #34d399;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        border: 2px solid #10b981;
+    }
+    .sell-signal {
+        background-color: #7f1d1d;
+        color: #f87171;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        border: 2px solid #ef4444;
+    }
+    .neutral-signal {
+        background-color: #313338;
+        color: #fbbf24;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        border: 2px solid #f59e0b;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-# Sidebar or main inputs
-col1, col2 = st.columns(2)
-with col1:
-    symbol = st.selectbox(
-        "Select Coin Symbol",
-        ["DOGE/USDT", "PEPE/USDT", "SOL/USDT", "BTC/USDT", "ETH/USDT", "SHIB/USDT", "XRP/USDT"],
-        index=0
-    )
-with col2:
-    timeframe = st.selectbox(
-        "Select Timeframe",
-        ["1m", "3m", "5m", "10m", "15m", "30m", "1h"],
-        index=4  # Default 15m
-    )
+# Header Section with Live Date & Time
+now = datetime.now()
+current_date_str = now.strftime("%A, %B %d, %Y")
+current_time_str = now.strftime("%I:%M:%S %p")
 
-analyze_btn = st.button("🔍 Analyze Market", use_container_width=True)
+st.title("⚡ JUTT ON TOP - Real-Time Crypto Signal Bot")
+col_d1, col_d2 = st.columns(2)
+with col_d1:
+    st.info(f"📅 **Date:** {current_date_str}")
+with col_d2:
+    st.info(f"⏰ **Current Time (Live):** {current_time_str}")
 
-# Helper function for indicators
+# Function to get all USDT trading pairs from Binance Vision API
+@st.cache_data(ttl=3600)
+def get_binance_symbols():
+    try:
+        url = "https://data.api.binance.vision/api/v3/exchangeInfo"
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            symbols = [s['symbol'] for s in data['symbols'] if s['quoteAsset'] == 'USDT' and s['status'] == 'TRADING']
+            return sorted(symbols)
+    except Exception as e:
+        pass
+    # Fallback default list if API fails
+    return ["BTCUSDT", "ETHUSDT", "DOGEUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "PEPEUSDT"]
+
+# Function to fetch live candle (klines) data
+def get_klines(symbol, interval='15m', limit=100):
+    url = f"https://data.api.binance.vision/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            raw = response.json()
+            df = pd.DataFrame(raw, columns=[
+                'open_time', 'open', 'high', 'low', 'close', 'volume',
+                'close_time', 'quote_asset_volume', 'number_of_trades',
+                'taker_buy_base_vol', 'taker_buy_quote_vol', 'ignore'
+            ])
+            df['close'] = df['close'].astype(float)
+            df['high'] = df['high'].astype(float)
+            df['low'] = df['low'].astype(float)
+            df['open'] = df['open'].astype(float)
+            df['volume'] = df['volume'].astype(float)
+            return df
+    except Exception as e:
+        return None
+    return None
+
+# Function to calculate RSI
 def calculate_rsi(series, period=14):
     delta = series.diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
     rs = gain / loss
-    return 100 - (100 / (1 + rs))
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
 
-def fetch_and_analyze(symbol, timeframe, limit=100):
-    try:
-        exchange = ccxt.binance()
-        ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
-        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        
-        # EMAs
-        df['ema9'] = df['close'].ewm(span=9, adjust=False).mean()
-        df['ema21'] = df['close'].ewm(span=21, adjust=False).mean()
-        df['ema50'] = df['close'].ewm(span=50, adjust=False).mean()
-        
-        # RSI
-        df['rsi'] = calculate_rsi(df['close'], period=14)
-        
-        # MACD
-        exp1 = df['close'].ewm(span=12, adjust=False).mean()
-        exp2 = df['close'].ewm(span=26, adjust=False).mean()
-        df['macd'] = exp1 - exp2
-        df['signal_line'] = df['macd'].ewm(span=9, adjust=False).mean()
-        
-        last = df.iloc[-1]
-        prev = df.iloc[-2]
-        
-        up_score = 0
-        down_score = 0
-        reasons = []
-        
-        # EMA check
-        if last['ema9'] > last['ema21'] > last['ema50']:
-            up_score += 2
-            reasons.append("EMA bullish stack")
-        elif last['ema9'] < last['ema21'] < last['ema50']:
-            down_score += 2
-            reasons.append("EMA bearish stack")
-            
-        # Price vs EMA50
-        if last['close'] > last['ema50']:
-            up_score += 1
-            reasons.append("Price above EMA50")
-        else:
-            down_score += 1
-            reasons.append("Price below EMA50")
-            
-        # RSI check
-        rsi_val = last['rsi']
-        if rsi_val < 40:
-            up_score += 1
-            reasons.append(f"RSI oversold ({rsi_val:.1f})")
-        elif rsi_val > 60:
-            down_score += 1
-            reasons.append(f"RSI overbought ({rsi_val:.1f})")
-            
-        # MACD check
-        if last['macd'] > last['signal_line']:
-            up_score += 2
-            reasons.append("MACD bullish crossover")
-        else:
-            down_score += 2
-            reasons.append("MACD bearish")
-            
-        # Candle check
-        if last['close'] > last['open']:
-            up_score += 1
-            reasons.append("Closed candle bullish")
-        else:
-            down_score += 1
-            reasons.append("Closed candle bearish")
-            
-        total_checks = 7
-        if up_score > down_score and up_score >= 4:
-            signal = "LONG / UP (BUY)"
-            confidence = int((up_score / total_checks) * 100)
-        elif down_score > up_score and down_score >= 4:
-            signal = "SHORT / DOWN (SELL)"
-            confidence = int((down_score / total_checks) * 100)
-        else:
-            signal = "NO TRADE / SIDEWAYS"
-            confidence = 0
-            reasons = ["No strong confirmation"]
-            
-        return {
-            "price": last['close'],
-            "rsi": rsi_val,
-            "up_score": up_score,
-            "down_score": down_score,
-            "signal": signal,
-            "confidence": confidence,
-            "reasons": reasons
-        }
-    except Exception as e:
-        return {"signal": "ERROR", "reasons": [str(e)]}
+# Sidebar Controls
+st.sidebar.header("⚙️ Bot Settings")
+all_symbols = get_binance_symbols()
+default_idx = all_symbols.index("DOGEUSDT") if "DOGEUSDT" in all_symbols else 0
 
-if analyze_btn:
-    with st.spinner("Fetching live Binance data..."):
-        res = fetch_and_assembled = fetch_and_analyze(symbol, timeframe)
-        
-        if res.get("signal") == "ERROR":
-            st.error(f"Error: {res['reasons'][0]}")
-        else:
-            st.divider()
-            col_a, col_b, col_c = st.columns(3)
-            col_a.metric("Current Price", f"${res['price']:,.4f}")
-            col_b.metric("RSI (14)", f"{res['rsi']:.2f}")
-            col_c.metric("Confidence", f"{res['confidence']}%")
-            
-            st.info(f"**UP SCORE:** {res['up_score']}  |  **DOWN SCORE:** {res['down_score']}")
-            
-            # Display Signal Box
-            if "LONG" in res['signal']:
-                st.success(f"### SIGNAL: {res['signal']}")
-            elif "SHORT" in res['signal']:
-                st.error(f"### SIGNAL: {res['signal']}")
-            else:
-                st.warning(f"### SIGNAL: {res['signal']}")
-                
-            st.markdown("**Reasons:**")
-            for r in res['reasons']:
-                st.write(f"- {r}")
+selected_symbol = st.sidebar.selectbox("Select Coin Symbol (USDT)", all_symbols, index=default_idx)
+timeframe = st.sidebar.selectbox("Select Timeframe", ["1m", "5m", "15m", "1h", "4h", "1d"], index=2)
+refresh_btn = st.sidebar.button("🔄 Refresh Signal Now")
+
+# Main Logic & Fetching
+with st.spinner(f"Analyzing live market data for {selected_symbol}..."):
+    df = get_klines(selected_symbol, interval=timeframe, limit=50)
+
+if df is not None and len(df) > 0:
+    df['RSI'] = calculate_rsi(df['close'], period=14)
+    df['EMA_10'] = df['close'].ewm(span=10, adjust=False).mean()
+    df['EMA_20'] = df['close'].ewm(span=20, adjust=False).mean()
+
+    current_price = df['close'].iloc[-1]
+    prev_price = df['close'].iloc[-2]
+    price_change_pct = ((current_price - prev_price) / prev_price) * 100
+    current_rsi = df['RSI'].iloc[-1]
+    ema_10 = df['EMA_10'].iloc[-1]
+    ema_20 = df['EMA_20'].iloc[-1]
+
+    # Metrics Row
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        st.metric(label="Coin Pair", value=selected_symbol)
+    with c2:
+        st.metric(label="Live Price (USDT)", value=f"${current_price:,.4f}", delta=f"{price_change_pct:.2f}%")
+    with c3:
+        st.metric(label="RSI (14)", value=f"{current_rsi:.2f}")
+    with c4:
+        trend_status = "BULLISH 🟢" if ema_10 > ema_20 else "BEARISH 🔴"
+        st.metric(label="Trend Status", value=trend_status)
+
+    # Signal Generation Logic
+    if current_rsi < 35 and ema_10 > ema_20:
+        signal_type = "STRONG BUY SIGNAL 🚀"
+        signal_class = "buy-signal"
+        reason = "RSI is oversold (< 35) and short-term EMA is above long-term EMA."
+    elif current_rsi > 65 and ema_10 < ema_20:
+        signal_type = "STRONG SELL SIGNAL ⚠️"
+        signal_class = "sell-signal"
+        reason = "RSI is overbought (> 65) and short-term EMA is below long-term EMA."
+    else:
+        signal_type = "HOLD / NEUTRAL ⏸️"
+        signal_class = "neutral-signal"
+        reason = "Market is consolidating. Wait for a clear breakout confirmation."
+
+    st.markdown("### 📡 Live Signal Analysis (Now This Time)")
+    st.markdown(f'<div class="{signal_class}">{signal_type}</div>', unsafe_allow_html=True)
+    st.markdown(f"**Analysis Reason:** {reason} | **Timestamp:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+    # Chart Section
+    st.markdown("### 📈 Live Price & Trend Chart")
+    chart_data = df[['close', 'EMA_10', 'EMA_20']].tail(40)
+    st.line_chart(chart_data)
+
+else:
+    st.error("Could not fetch data from Binance. Please check your internet connection or try again.")
