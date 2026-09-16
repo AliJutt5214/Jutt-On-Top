@@ -1,616 +1,1724 @@
+import os
+import json
+import time
+import urllib.request
+from urllib.parse import quote
+
 import streamlit as st
 import streamlit.components.v1 as components
 
+
+# ============================================================
+# JUTT BOT PRO — LIVE MARKET TERMINAL
+# ============================================================
+# Firebase removed.
+# No fake/random prices.
+# No fake accuracy.
+#
+# Set your REAL/AUTHORIZED market feed in:
+#
+# MARKET_FEED_URL
+#
+# Expected JSON:
+#
+# {
+#   "pair": "NZD/CHF (OTC)",
+#   "price": 0.12345,
+#   "timestamp": 1760000000000,
+#   "candles": [
+#       {
+#           "time": 1760000000000,
+#           "open": 0.12340,
+#           "high": 0.12350,
+#           "low": 0.12335,
+#           "close": 0.12345
+#       }
+#   ]
+# }
+#
+# ============================================================
+
+
 st.set_page_config(
-    page_title="JUTT BOT PRO — Quotex Binary AI Terminal",
+    page_title="JUTT BOT PRO — Live Market Terminal",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
 )
+
+
+# ============================================================
+# CONFIG
+# ============================================================
+
+MARKET_FEED_URL = os.getenv("MARKET_FEED_URL", "").strip()
+
+PAIRS = [
+    "NZD/CHF (OTC)",
+    "USD/INR (OTC)",
+    "NZD/JPY (OTC)",
+    "USD/COP (OTC)",
+    "USD/IDR (OTC)",
+    "EUR/GBP",
+    "USD/PHP (OTC)",
+    "NZD/CAD (OTC)",
+    "EUR/NZD (OTC)",
+    "USD/BRL (OTC)",
+    "CAD/JPY",
+    "EUR/USD",
+    "GBP/USD",
+    "USD/JPY",
+    "AUD/USD",
+    "USD/CAD",
+]
+
+
+EXPIRIES = {
+    "5 Seconds": 5,
+    "10 Seconds": 10,
+    "15 Seconds": 15,
+    "30 Seconds": 30,
+    "1 Minute": 60,
+    "2 Minutes": 120,
+    "5 Minutes": 300,
+}
+
+
+# ============================================================
+# HIDE STREAMLIT UI
+# ============================================================
 
 hide_streamlit_style = """
 <style>
-    #MainMenu {visibility: hidden; display: none !important;}
-    footer {visibility: hidden; display: none !important;}
-    header {visibility: hidden; display: none !important;}
-    .stDeployButton {display: none !important;}
-    [data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
-    div[data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-    div[data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
-    .viewerBadge_container__1QSob {visibility: hidden !important; display: none !important;}
-    a[href*="streamlit.io"] {display: none !important;}
-    div[class*="viewerBadge"] {display: none !important;}
-    .block-container {
-        padding-top: 0rem;
-        padding-bottom: 0rem;
-        padding-left: 0rem;
-        padding-right: 0rem;
-        overscroll-behavior-y: none;
-    }
+
+#MainMenu,
+footer,
+header,
+.stDeployButton,
+[data-testid="stStatusWidget"],
+div[data-testid="stToolbar"],
+div[data-testid="stDecoration"],
+.viewerBadge_container__1QSob,
+a[href*="streamlit.io"],
+div[class*="viewerBadge"] {
+    display:none !important;
+    visibility:hidden !important;
+}
+
+.block-container {
+    padding:0 !important;
+    max-width:100% !important;
+}
+
 </style>
 """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-html_code = """
+st.markdown(
+    hide_streamlit_style,
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# SESSION STATE
+# ============================================================
+
+if "pair" not in st.session_state:
+    st.session_state.pair = PAIRS[0]
+
+if "expiry" not in st.session_state:
+    st.session_state.expiry = 30
+
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+
+# ============================================================
+# LIVE FEED
+# ============================================================
+
+def get_live_feed(pair):
+
+    if not MARKET_FEED_URL:
+
+        return None, "LIVE MARKET FEED NOT CONFIGURED"
+
+    try:
+
+        separator = "&" if "?" in MARKET_FEED_URL else "?"
+
+        url = (
+            MARKET_FEED_URL
+            + separator
+            + "pair="
+            + quote(pair)
+        )
+
+        request = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "JUTT-BOT-PRO/1.0"
+            }
+        )
+
+        with urllib.request.urlopen(
+            request,
+            timeout=5
+        ) as response:
+
+            raw = response.read().decode("utf-8")
+
+        data = json.loads(raw)
+
+        if not isinstance(data, dict):
+
+            return None, "INVALID FEED RESPONSE"
+
+        price = data.get("price")
+
+        if price is None:
+
+            return None, "PRICE NOT RECEIVED"
+
+        price = float(price)
+
+        candles = data.get("candles", [])
+
+        clean_candles = []
+
+        if isinstance(candles, list):
+
+            for candle in candles:
+
+                try:
+
+                    clean_candles.append({
+
+                        "time": float(
+                            candle.get(
+                                "time",
+                                0
+                            )
+                        ),
+
+                        "open": float(
+                            candle["open"]
+                        ),
+
+                        "high": float(
+                            candle["high"]
+                        ),
+
+                        "low": float(
+                            candle["low"]
+                        ),
+
+                        "close": float(
+                            candle["close"]
+                        )
+
+                    })
+
+                except (
+                    KeyError,
+                    TypeError,
+                    ValueError
+                ):
+
+                    continue
+
+        if len(clean_candles) < 20:
+
+            return None, (
+                "AT LEAST 20 LIVE CANDLES "
+                "ARE REQUIRED"
+            )
+
+        return {
+
+            "pair": str(
+                data.get(
+                    "pair",
+                    pair
+                )
+            ),
+
+            "price": price,
+
+            "timestamp": data.get(
+                "timestamp",
+                int(time.time() * 1000)
+            ),
+
+            "candles": clean_candles
+
+        }, None
+
+    except Exception as error:
+
+        return None, (
+            "LIVE FEED ERROR: "
+            + str(error)
+        )
+
+
+# ============================================================
+# RSI
+# ============================================================
+
+def calculate_rsi(
+    closes,
+    period=14
+):
+
+    if len(closes) < period + 1:
+
+        return None
+
+    gains = []
+    losses = []
+
+    start = len(closes) - period
+
+    for i in range(
+        start,
+        len(closes)
+    ):
+
+        difference = (
+            closes[i]
+            - closes[i - 1]
+        )
+
+        if difference >= 0:
+
+            gains.append(
+                difference
+            )
+
+            losses.append(0)
+
+        else:
+
+            gains.append(0)
+
+            losses.append(
+                abs(difference)
+            )
+
+    average_gain = (
+        sum(gains) / period
+    )
+
+    average_loss = (
+        sum(losses) / period
+    )
+
+    if average_loss == 0:
+
+        return 100.0
+
+    relative_strength = (
+        average_gain
+        / average_loss
+    )
+
+    value = (
+        100
+        - (
+            100
+            / (
+                1
+                + relative_strength
+            )
+        )
+    )
+
+    return round(value, 1)
+
+
+# ============================================================
+# EMA
+# ============================================================
+
+def calculate_ema(
+    values,
+    period
+):
+
+    if len(values) < period:
+
+        return None
+
+    multiplier = (
+        2 / (period + 1)
+    )
+
+    ema_value = (
+        sum(values[:period])
+        / period
+    )
+
+    for value in values[period:]:
+
+        ema_value = (
+            (
+                value
+                - ema_value
+            )
+            * multiplier
+        ) + ema_value
+
+    return ema_value
+
+
+# ============================================================
+# ATR
+# ============================================================
+
+def calculate_atr(
+    candles,
+    period=14
+):
+
+    if len(candles) < period + 1:
+
+        return None
+
+    true_ranges = []
+
+    for i in range(
+        1,
+        len(candles)
+    ):
+
+        current = candles[i]
+
+        previous_close = (
+            candles[i - 1]["close"]
+        )
+
+        true_range = max(
+
+            current["high"]
+            - current["low"],
+
+            abs(
+                current["high"]
+                - previous_close
+            ),
+
+            abs(
+                current["low"]
+                - previous_close
+            )
+
+        )
+
+        true_ranges.append(
+            true_range
+        )
+
+    return (
+        sum(
+            true_ranges[-period:]
+        )
+        / period
+    )
+
+
+# ============================================================
+# MARKET ANALYSIS
+# ============================================================
+
+def analyze_market(candles):
+
+    closes = [
+        candle["close"]
+        for candle in candles
+    ]
+
+    if len(closes) < 22:
+
+        return {
+
+            "signal": "WAIT",
+
+            "confidence": 0,
+
+            "rsi": None,
+
+            "trend": "WAITING",
+
+            "reason": (
+                "Not enough live candles."
+            ),
+
+            "price": (
+                closes[-1]
+                if closes
+                else None
+            )
+
+        }
+
+    current_price = closes[-1]
+
+    previous_price = closes[-2]
+
+    rsi_value = calculate_rsi(
+        closes
+    )
+
+    ema9 = calculate_ema(
+        closes,
+        9
+    )
+
+    ema21 = calculate_ema(
+        closes,
+        21
+    )
+
+    atr_value = calculate_atr(
+        candles
+    )
+
+    score = 0
+
+    reasons = []
+
+    # --------------------------------------------------------
+    # TREND
+    # --------------------------------------------------------
+
+    if ema9 > ema21:
+
+        score += 2
+
+        trend = "BULLISH"
+
+        reasons.append(
+            "EMA9 above EMA21"
+        )
+
+    elif ema9 < ema21:
+
+        score -= 2
+
+        trend = "BEARISH"
+
+        reasons.append(
+            "EMA9 below EMA21"
+        )
+
+    else:
+
+        trend = "SIDEWAYS"
+
+
+    # --------------------------------------------------------
+    # RSI
+    # --------------------------------------------------------
+
+    if rsi_value < 30:
+
+        score += 1
+
+        reasons.append(
+            "RSI oversold"
+        )
+
+    elif rsi_value > 70:
+
+        score -= 1
+
+        reasons.append(
+            "RSI overbought"
+        )
+
+    elif (
+        50 <= rsi_value <= 65
+        and current_price > previous_price
+    ):
+
+        score += 1
+
+        reasons.append(
+            "RSI supports upward momentum"
+        )
+
+    elif (
+        35 <= rsi_value <= 50
+        and current_price < previous_price
+    ):
+
+        score -= 1
+
+        reasons.append(
+            "RSI supports downward momentum"
+        )
+
+
+    # --------------------------------------------------------
+    # MOMENTUM
+    # --------------------------------------------------------
+
+    lookback = min(
+        5,
+        len(closes) - 1
+    )
+
+    momentum = (
+        closes[-1]
+        - closes[
+            -1 - lookback
+        ]
+    )
+
+    if momentum > 0:
+
+        score += 1
+
+        reasons.append(
+            "Positive short momentum"
+        )
+
+    elif momentum < 0:
+
+        score -= 1
+
+        reasons.append(
+            "Negative short momentum"
+        )
+
+
+    # --------------------------------------------------------
+    # SIGNAL
+    # --------------------------------------------------------
+
+    if score >= 4:
+
+        signal = "CALL"
+
+        confidence = min(
+            95,
+            60 + abs(score) * 6
+        )
+
+    elif score <= -4:
+
+        signal = "PUT"
+
+        confidence = min(
+            95,
+            60 + abs(score) * 6
+        )
+
+    else:
+
+        signal = "WAIT"
+
+        confidence = min(
+            59,
+            50 + abs(score) * 3
+        )
+
+
+    if not reasons:
+
+        reason = (
+            "No strong market confluence."
+        )
+
+    else:
+
+        reason = " + ".join(
+            reasons
+        )
+
+
+    return {
+
+        "signal": signal,
+
+        "confidence": confidence,
+
+        "rsi": rsi_value,
+
+        "trend": trend,
+
+        "reason": reason,
+
+        "price": current_price,
+
+        "atr": atr_value,
+
+        "ema9": ema9,
+
+        "ema21": ema21,
+
+    }
+
+
+# ============================================================
+# LOAD DATA
+# ============================================================
+
+feed, feed_error = get_live_feed(
+    st.session_state.pair
+)
+
+
+if feed:
+
+    analysis = analyze_market(
+        feed["candles"]
+    )
+
+    live_price = feed["price"]
+
+    candles = feed["candles"]
+
+    feed_status = "LIVE"
+
+else:
+
+    analysis = {
+
+        "signal": "WAIT",
+
+        "confidence": 0,
+
+        "rsi": None,
+
+        "trend": "OFFLINE",
+
+        "reason": (
+            "Real market feed is not connected."
+        ),
+
+        "price": None,
+
+        "atr": None
+
+    }
+
+    live_price = None
+
+    candles = []
+
+    feed_status = "OFFLINE"
+
+
+# ============================================================
+# VALUES
+# ============================================================
+
+pair = st.session_state.pair
+
+signal = analysis["signal"]
+
+confidence = analysis["confidence"]
+
+rsi_value = analysis["rsi"]
+
+trend = analysis["trend"]
+
+reason = analysis["reason"]
+
+
+if live_price is not None:
+
+    price_text = (
+        f"{live_price:.8f}"
+    )
+
+else:
+
+    price_text = "NO LIVE DATA"
+
+
+if rsi_value is not None:
+
+    rsi_text = str(
+        rsi_value
+    )
+
+else:
+
+    rsi_text = "--"
+
+
+if confidence:
+
+    confidence_text = (
+        f"{confidence}%"
+    )
+
+else:
+
+    confidence_text = "--"
+
+
+chart_values = [
+
+    candle["close"]
+
+    for candle in candles[-40:]
+
+]
+
+
+chart_json = json.dumps(
+    chart_values
+)
+
+
+# ============================================================
+# PAIR OPTIONS
+# ============================================================
+
+pair_options = ""
+
+for selected_pair in PAIRS:
+
+    selected = ""
+
+    if selected_pair == pair:
+
+        selected = "selected"
+
+    pair_options += f"""
+    <option
+        value="{selected_pair}"
+        {selected}
+    >
+        {selected_pair}
+    </option>
+    """
+
+
+# ============================================================
+# EXPIRY OPTIONS
+# ============================================================
+
+expiry_options = ""
+
+for label, seconds in EXPIRIES.items():
+
+    selected = ""
+
+    if seconds == st.session_state.expiry:
+
+        selected = "selected"
+
+    expiry_options += f"""
+    <option
+        value="{seconds}"
+        {selected}
+    >
+        {label}
+    </option>
+    """
+
+
+# ============================================================
+# SIGNAL CSS CLASS
+# ============================================================
+
+if signal == "CALL":
+
+    signal_class = "call"
+
+elif signal == "PUT":
+
+    signal_class = "put"
+
+else:
+
+    signal_class = "wait"
+
+
+# ============================================================
+# HTML
+# ============================================================
+
+html_code = f"""
 <!DOCTYPE html>
-<html lang="en">
+
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JUTT BOT PRO — Quotex Binary AI Terminal</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-        body {
-            background-color: #0b0e11;
-            color: #eaecef;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            padding: 10px;
-            max-width: 480px;
-            margin: 0 auto;
-            height: 100vh;
-            overflow-y: scroll;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: none;
-            touch-action: pan-y;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #1e2329;
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: 1px solid #2b313a;
-            margin-bottom: 10px;
-        }
-        .clock-box {
-            text-align: right;
-            font-size: 11px;
-            color: #f0b90b;
-            font-weight: bold;
-        }
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-        label {
-            font-size: 11px;
-            color: #848e9c;
-        }
-        select, button {
-            width: 100%;
-            background: #1e2329;
-            color: #eaecef;
-            border: 1px solid #2b313a;
-            padding: 9px;
-            border-radius: 8px;
-            font-size: 12px;
-            outline: none;
-        }
-        .btn-generate {
-            grid-column: span 2;
-            background: linear-gradient(135deg, #0ecb81 0%, #064e3b 100%);
-            color: #fff;
-            font-weight: 800;
-            font-size: 14px;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(14, 203, 129, 0.3);
-        }
-        .btn-generate:disabled {
-            background: #2b313a;
-            color: #848e9c;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-        .btn-generate:active:not(:disabled) {
-            transform: scale(0.97);
-        }
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        .metric-card {
-            background: #1e2329;
-            border: 1px solid #2b313a;
-            padding: 8px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .metric-card .title {
-            font-size: 9px;
-            color: #848e9c;
-        }
-        .metric-card .value {
-            font-size: 12px;
-            font-weight: bold;
-            color: #eaecef;
-            margin-top: 2px;
-        }
-        .signal-card {
-            display: none;
-            padding: 14px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 15px;
-        }
-        .signal-call {
-            background: linear-gradient(135deg, #0ecb81 0%, #064e3b 100%);
-            border: 1px solid #0ecb81;
-            color: #fff;
-        }
-        .signal-put {
-            background: linear-gradient(135deg, #f6465d 0%, #7f1d1d 100%);
-            border: 1px solid #f6465d;
-            color: #fff;
-        }
-        .signal-wait {
-            background: linear-gradient(135deg, #f0b90b 0%, #78350f 100%);
-            border: 1px solid #f0b90b;
-            color: #fff;
-        }
-        .timer-strip {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #1e2329;
-            border: 1px solid #2b313a;
-            padding: 8px 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 11px;
-        }
-        .timer-val {
-            color: #f0b90b;
-            font-weight: bold;
-            font-size: 12px;
-        }
-        .spinner-box {
-            display: none;
-            text-align: center;
-            padding: 14px;
-            background: #1e2329;
-            border-radius: 10px;
-            border: 1px solid #f0b90b;
-            margin-bottom: 10px;
-            color: #f0b90b;
-            font-size: 13px;
-        }
-        .spinner {
-            width: 22px;
-            height: 22px;
-            border: 3px solid rgba(240, 185, 11, 0.3);
-            border-top: 3px solid #f0b90b;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 6px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .chart-container {
-            background: #1e2329;
-            border: 1px solid #2b313a;
-            border-radius: 10px;
-            padding: 8px;
-            position: relative;
-            height: 210px;
-            margin-bottom: 10px;
-        }
-        .reason-box {
-            background: #1e2329;
-            border: 1px solid #2b313a;
-            padding: 8px;
-            border-radius: 8px;
-            font-size: 11px;
-            color: #848e9c;
-            margin-bottom: 10px;
-        }
-        .table-container {
-            background: #1e2329;
-            border: 1px solid #2b313a;
-            border-radius: 10px;
-            padding: 8px;
-            margin-bottom: 30px;
-        }
-        .table-title {
-            font-size: 11px;
-            font-weight: bold;
-            color: #f0b90b;
-            margin-bottom: 6px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 10px;
-            text-align: center;
-        }
-        th {
-            color: #848e9c;
-            padding-bottom: 4px;
-            border-bottom: 1px solid #2b313a;
-        }
-        td {
-            padding: 5px 2px;
-            border-bottom: 1px solid #181c22;
-        }
-        .badge-win {
-            color: #0ecb81;
-            font-weight: bold;
-        }
-    </style>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no"
+>
+
+<script
+src="https://cdn.jsdelivr.net/npm/chart.js">
+</script>
+
+
+<style>
+
+* {{
+
+    box-sizing:border-box;
+
+    margin:0;
+
+    padding:0;
+
+    user-select:none;
+
+    -webkit-tap-highlight-color:
+    transparent;
+
+}}
+
+
+body {{
+
+    background:#0b0e11;
+
+    color:#eaecef;
+
+    font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial;
+
+    padding:10px;
+
+    max-width:520px;
+
+    margin:auto;
+
+}}
+
+
+.card {{
+
+    background:#1e2329;
+
+    border:
+    1px solid #2b313a;
+
+    border-radius:10px;
+
+    padding:10px;
+
+    margin-bottom:10px;
+
+}}
+
+
+.header {{
+
+    display:flex;
+
+    justify-content:
+    space-between;
+
+    align-items:center;
+
+}}
+
+
+.logo {{
+
+    font-size:22px;
+
+    font-weight:900;
+
+    color:#f0b90b;
+
+}}
+
+
+.status {{
+
+    font-size:10px;
+
+    font-weight:900;
+
+}}
+
+
+.live {{
+
+    color:#0ecb81;
+
+}}
+
+
+.offline {{
+
+    color:#f6465d;
+
+}}
+
+
+.controls {{
+
+    display:grid;
+
+    grid-template-columns:
+    1fr 1fr;
+
+    gap:8px;
+
+}}
+
+
+label {{
+
+    display:block;
+
+    color:#848e9c;
+
+    font-size:10px;
+
+    margin-bottom:4px;
+
+}}
+
+
+select,
+button {{
+
+    width:100%;
+
+    background:#11161c;
+
+    color:#eaecef;
+
+    border:
+    1px solid #2b313a;
+
+    border-radius:8px;
+
+    padding:10px;
+
+    font-size:12px;
+
+    outline:none;
+
+}}
+
+
+button {{
+
+    grid-column:
+    span 2;
+
+    background:
+    linear-gradient(
+        135deg,
+        #0ecb81,
+        #065f46
+    );
+
+    border:0;
+
+    color:white;
+
+    font-weight:900;
+
+}}
+
+
+.metrics {{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(3,1fr);
+
+    gap:7px;
+
+}}
+
+
+.metric {{
+
+    background:#11161c;
+
+    border:
+    1px solid #2b313a;
+
+    border-radius:8px;
+
+    padding:9px 3px;
+
+    text-align:center;
+
+}}
+
+
+.metric small {{
+
+    color:#848e9c;
+
+    font-size:8px;
+
+}}
+
+
+.metric strong {{
+
+    display:block;
+
+    margin-top:3px;
+
+    font-size:11px;
+
+}}
+
+
+.signal {{
+
+    text-align:center;
+
+    padding:16px;
+
+    border-radius:10px;
+
+    margin-bottom:10px;
+
+    font-size:21px;
+
+    font-weight:900;
+
+}}
+
+
+.call {{
+
+    background:#064e3b;
+
+    border:
+    1px solid #0ecb81;
+
+    color:#0ecb81;
+
+}}
+
+
+.put {{
+
+    background:#7f1d1d;
+
+    border:
+    1px solid #f6465d;
+
+    color:#f6465d;
+
+}}
+
+
+.wait {{
+
+    background:#78350f;
+
+    border:
+    1px solid #f0b90b;
+
+    color:#f0b90b;
+
+}}
+
+
+.timer {{
+
+    display:flex;
+
+    justify-content:
+    space-between;
+
+    font-size:10px;
+
+    color:#848e9c;
+
+}}
+
+
+.timer strong {{
+
+    color:#f0b90b;
+
+}}
+
+
+.chart {{
+
+    height:220px;
+
+}}
+
+
+.reason {{
+
+    color:#aab2bd;
+
+    font-size:10px;
+
+    line-height:1.5;
+
+}}
+
+
+.table-title {{
+
+    color:#f0b90b;
+
+    font-size:11px;
+
+    font-weight:900;
+
+    margin-bottom:7px;
+
+}}
+
+
+table {{
+
+    width:100%;
+
+    border-collapse:
+    collapse;
+
+    font-size:9px;
+
+    text-align:center;
+
+}}
+
+
+th {{
+
+    color:#848e9c;
+
+    padding:5px 2px;
+
+    border-bottom:
+    1px solid #2b313a;
+
+}}
+
+
+td {{
+
+    padding:5px 2px;
+
+    border-bottom:
+    1px solid #181c22;
+
+}}
+
+
+.notice {{
+
+    color:#f0b90b;
+
+    font-size:10px;
+
+    line-height:1.5;
+
+}}
+
+</style>
+
 </head>
+
+
 <body>
 
-    <div class="header">
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 130" width="200" height="66">
-              <defs>
-                <linearGradient id="gold3D" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#fffdf0"/>
-                  <stop offset="15%" stop-color="#fde047"/>
-                  <stop offset="50%" stop-color="#ca8a04"/>
-                  <stop offset="85%" stop-color="#854d0e"/>
-                  <stop offset="100%" stop-color="#422006"/>
-                </linearGradient>
-                <linearGradient id="silver3D" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#ffffff"/>
-                  <stop offset="40%" stop-color="#e5e7eb"/>
-                  <stop offset="100%" stop-color="#9ca3af"/>
-                </linearGradient>
-                <radialGradient id="glow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                  <stop offset="0%" stop-color="#fde047" stop-opacity="0.5"/>
-                  <stop offset="100%" stop-color="#ca8a04" stop-opacity="0"/>
-                </radialGradient>
-              </defs>
-              <circle cx="50" cy="50" r="42" fill="#1f1f1f" stroke="url(#gold3D)" stroke-width="4"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#fef08a" stroke-width="1.5" opacity="0.4"/>
-              <ellipse cx="50" cy="50" r="30" fill="url(#glow)"/>
-              <rect x="38" y="38" width="6" height="20" fill="url(#gold3D)" rx="2"/>
-              <line x1="41" y1="34" x2="41" y2="64" stroke="url(#gold3D)" stroke-width="3" stroke-linecap="round"/>
-              <rect x="52" y="28" width="6" height="30" fill="url(#gold3D)" rx="2"/>
-              <line x1="55" y1="24" x2="55" y2="64" stroke="url(#gold3D)" stroke-width="3" stroke-linecap="round"/>
-              <path d="M28 70 Q 45 42, 66 54 T 84 30" fill="none" stroke="#15803d" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
-              <polygon points="84,30 80,42 92,40" fill="#16a34a"/>
-              <path d="M185 2 L197 18 L209 2 L221 18 L233 2 V26 H185 Z" fill="url(#gold3D)" filter="drop-shadow(0 0 3px #fde047)"/>
-              <text x="145" y="56" fill="url(#gold3D)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="36" letter-spacing="2">JUTT</text>
-              <text x="238" y="56" fill="url(#silver3D)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="36" letter-spacing="2">BOT</text>
-              <text x="210" y="78" fill="#e5e7eb" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="12" text-anchor="middle" letter-spacing="4">PRO TRADER</text>
-              <text x="215" y="108" fill="url(#gold3D)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="10" text-anchor="middle" letter-spacing="2">ANALYZE  |  SIGNAL  |  TRADE  |  GROW</text>
-            </svg>
-        </div>
-        <div class="clock-box" id="liveClock">00:00:00 AM</div>
+
+<div class="card header">
+
+    <div class="logo">
+
+        JUTT BOT PRO
+
     </div>
+
+    <div
+        class="status {
+            'live'
+            if feed
+            else
+            'offline'
+        }"
+    >
+
+        ● {feed_status}
+
+    </div>
+
+</div>
+
+
+<div class="card">
 
     <div class="controls">
-        <div class="control-group">
-            <label>💱 Pair / Asset</label>
-            <select id="pairSelect" onchange="changeAsset()">
-                <option value="EURUSD">EUR/USD (Euro/USD)</option>
-                <option value="GBPUSD">GBP/USD (Pound/USD)</option>
-                <option value="EURJPY">EUR/JPY (Euro/Yen)</option>
-                <option value="AUDUSD">AUD/USD (Aussie/USD)</option>
-                <option value="USDCAD">USD/CAD (USD/CAD)</option>
+
+
+        <div>
+
+            <label>
+                PAIR / ASSET
+            </label>
+
+            <select
+                id="pairSelect"
+            >
+
+                {pair_options}
+
             </select>
+
         </div>
-        <div class="control-group">
-            <label>⏳ Expiry Time</label>
-            <select id="expirySelect">
-                <option value="30" selected>30 Seconds (30s)</option>
-                <option value="60">1 Minute (1m)</option>
-                <option value="120">2 Minutes (2m)</option>
-                <option value="300">5 Minutes (5m)</option>
+
+
+        <div>
+
+            <label>
+                EXPIRY
+            </label>
+
+            <select
+                id="expirySelect"
+            >
+
+                {expiry_options}
+
             </select>
+
         </div>
-        <button class="btn-generate" id="genBtn" onclick="generateFirebaseSignal()">⚡ GENERATE FIREBASE AI SIGNAL</button>
+
+
+        <button
+            onclick="generateSignal()"
+        >
+
+            ⚡ ANALYZE & GENERATE SIGNAL
+
+        </button>
+
+
     </div>
 
-    <div class="timer-strip">
-        <span>Signal Expiry Timer</span>
-        <span class="timer-val" id="countdownTimer">READY</span>
+</div>
+
+
+<div class="metrics card">
+
+
+    <div class="metric">
+
+        <small>
+            LIVE PRICE
+        </small>
+
+        <strong>
+            {price_text}
+        </strong>
+
     </div>
 
-    <div class="metrics-grid">
-        <div class="metric-card">
-            <div class="title">LIVE PRICE</div>
-            <div class="value" id="mPrice">Loading...</div>
-        </div>
-        <div class="metric-card">
-            <div class="title">RSI (14)</div>
-            <div class="value" id="mRSI">50.0</div>
-        </div>
-        <div class="metric-card">
-            <div class="title">TREND</div>
-            <div class="value" id="mTrend">NEUTRAL 🟡</div>
-        </div>
+
+    <div class="metric">
+
+        <small>
+            RSI (14)
+        </small>
+
+        <strong>
+            {rsi_text}
+        </strong>
+
     </div>
 
-    <div class="spinner-box" id="spinnerBox">
-        <div class="spinner"></div>
-        <div>🔥 Fetching Real-time Market Feed & Firebase Confluence...</div>
+
+    <div class="metric">
+
+        <small>
+            TREND
+        </small>
+
+        <strong>
+            {trend}
+        </strong>
+
     </div>
 
-    <div class="signal-card" id="signalCard">
-        <div id="signalTitle">WAITING...</div>
-        <div style="font-size: 11px; font-weight: normal; margin-top: 3px;" id="signalSub">Syncing with database...</div>
+
+</div>
+
+
+<div
+class="signal {signal_class}"
+>
+
+    {signal}
+
+    <div
+    style="
+    font-size:10px;
+    margin-top:5px;
+    font-weight:600;
+    "
+    >
+
+        Model Strength:
+        {confidence_text}
+
     </div>
 
-    <div class="chart-container">
-        <canvas id="marketChart"></canvas>
+</div>
+
+
+<div class="card timer">
+
+    <span>
+        LAST CALL / EXPIRY
+    </span>
+
+    <strong id="timer">
+        READY
+    </strong>
+
+</div>
+
+
+<div class="card chart">
+
+    <canvas
+        id="marketChart">
+    </canvas>
+
+</div>
+
+
+<div class="card reason">
+
+    <b>
+        Analysis:
+    </b>
+
+    {reason}
+
+</div>
+
+
+<div class="card">
+
+    <div class="table-title">
+
+        🕒 RECENT SIGNALS
+
     </div>
 
-    <div class="reason-box" id="reasonBox">
-        🧠 <b>Jutt Bot Firebase Sync:</b> Connected to smile-rider-backend Realtime Database...
-    </div>
 
-    <div class="table-container">
-        <div class="table-title">🕒 Recent Signals History</div>
-        <table id="historyTable">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>TIME</th>
-                    <th>PAIR</th>
-                    <th>TF</th>
-                    <th>SIGNAL</th>
-                    <th>CONF</th>
-                    <th>RESULT</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
+    <table>
 
-    <script>
-        const FIREBASE_URL = "https://smile-rider-backend-default-rtdb.firebaseio.com/";
+        <thead>
 
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('liveClock').innerText = now.toLocaleTimeString();
-        }, 1000);
+            <tr>
 
-        let canGenerate = true;
-        const timerElem = document.getElementById('countdownTimer');
-        const genBtn = document.getElementById('genBtn');
-        let prices = [];
-        let basePrice = 1.0850;
+                <th>
+                    TIME
+                </th>
 
-        const basePrices = {
-            'EURUSD': 1.0854,
-            'GBPUSD': 1.2685,
-            'EURJPY': 161.40,
-            'AUDUSD': 0.6542,
-            'USDCAD': 1.3620
-        };
+                <th>
+                    PAIR
+                </th>
 
-        let currentPair = document.getElementById('pairSelect').value;
-        basePrice = basePrices[currentPair];
+                <th>
+                    TF
+                </th>
 
-        function changeAsset() {
-            currentPair = document.getElementById('pairSelect').value;
-            basePrice = basePrices[currentPair];
-            prices = [];
-            for(let i=0; i<30; i++) {
-                basePrice += (Math.random() - 0.49) * 0.0002;
-                prices.push(parseFloat(basePrice.toFixed(5)));
-            }
-            marketChart.data.datasets[0].data = prices;
-            marketChart.update();
-        }
+                <th>
+                    SIGNAL
+                </th>
 
-        for(let i=0; i<30; i++) {
-            basePrice += (Math.random() - 0.49) * 0.0002;
-            prices.push(parseFloat(basePrice.toFixed(5)));
-        }
+                <th>
+                    CONF
+                </th>
 
-        const ctx = document.getElementById('marketChart').getContext('2d');
-        const labels = Array.from({length: 30}, (_, i) => `T-${30-i}s`);
+            </tr>
 
-        const marketChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Live Real-Time Price',
-                    data: prices,
-                    borderColor: '#0ecb81',
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    tension: 0.2,
-                    fill: true,
-                    backgroundColor: 'rgba(14, 203, 129, 0.08)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: '#848e9c', font: { size: 8 } }, grid: { color: '#2b313a' } },
-                    y: { ticks: { color: '#848e9c', font: { size: 8 } }, grid: { color: '#2b313a' } }
-                }
-            }
-        });
+        </thead>
 
-        function calculateRSI(dataArr) {
-            if (dataArr.length < 15) return 50.0;
-            let gains = 0;
-            let losses = 0;
-            for (let i = dataArr.length - 14; i < dataArr.length; i++) {
-                let diff = dataArr[i] - dataArr[i - 1];
-                if (diff >= 0) gains += diff;
-                else losses -= diff;
-            }
-            let avgGain = gains / 14;
-            let avgLoss = losses / 14;
-            if (avgLoss === 0) return 100;
-            let rs = avgGain / avgLoss;
-            let rsi = 100 - (100 / (1 + rs));
-            return parseFloat(rsi.toFixed(1));
-        }
 
-        async function syncFirebaseTick() {
-            try {
-                let res = await fetch(`${FIREBASE_URL}signals/${currentPair}.json`);
-                let data = await res.json();
-                if (data && data.price) {
-                    return parseFloat(data.price);
-                }
-            } catch (e) {}
-            let lastP = prices[prices.length - 1];
-            return parseFloat((lastP + (Math.random() - 0.495) * 0.0002).toFixed(5));
-        }
+        <tbody>
 
-        setInterval(async () => {
-            let nextP = await syncFirebaseTick();
-            prices.shift();
-            prices.push(nextP);
-            marketChart.update('none');
+            <tr>
 
-            document.getElementById('mPrice').innerText = nextP.toFixed(5);
-            let rsiVal = calculateRSI(prices);
-            document.getElementById('mRSI').innerText = rsiVal;
+                <td>
+                    --
+                </td>
 
-            const trendElem = document.getElementById('mTrend');
-            if (rsiVal > 56) {
-                trendElem.innerText = 'BULLISH 🟢';
-            } else if (rsiVal < 44) {
-                trendElem.innerText = 'BEARISH 🔴';
-            } else {
-                trendElem.innerText = 'SIDEWAYS 🟡';
-            }
-        }, 1200);
+                <td>
+                    {pair}
+                </td>
 
-        function startCountdown(durationSec) {
-            canGenerate = false;
-            genBtn.disabled = true;
-            let timeLeft = durationSec;
+                <td>
+                    --
+                </td>
 
-            function formatTime(s) {
-                if (s < 60) return `00:${s < 10 ? '0' + s : s}`;
-                let m = Math.floor(s / 60);
-                let rem = s % 60;
-                return `0${m}:${rem < 10 ? '0' + rem : rem}`;
-            }
+                <td>
+                    {signal}
+                </td>
 
-            timerElem.innerText = `EXPIRY: ${formatTime(timeLeft)}`;
+                <td>
+                    {confidence_text}
+                </td>
 
-            const interval = setInterval(() => {
-                timeLeft--;
-                timerElem.innerText = `EXPIRY: ${formatTime(timeLeft)}`;
+            </tr>
 
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    timerElem.innerText = `READY FOR NEXT SIGNAL!`;
-                    canGenerate = true;
-                    genBtn.disabled = false;
-                }
-            }, 1000);
-        }
+        </tbody>
 
-        async function generateFirebaseSignal() {
-            if (!canGenerate) return;
+    </table>
 
-            const spinner = document.getElementById('spinnerBox');
-            const card = document.getElementById('signalCard');
-            const reasonBox = document.getElementById('reasonBox');
-            const pair = document.getElementById('pairSelect').value;
-            const expirySec = parseInt(document.getElementById('expirySelect').value);
-            const expiryText = document.getElementById('expirySelect').options[document.getElementById('expirySelect').selectedIndex].text;
+</div>
 
-            card.style.display = 'none';
-            spinner.style.display = 'block';
 
-            try {
-                await fetch(`${FIREBASE_URL}requests/${pair}.json`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ requested_at: Date.now(), expiry: expirySec })
-                });
-            } catch (err) {}
+<div class="card notice">
 
-            setTimeout(() => {
-                spinner.style.display = 'none';
-                card.style.display = 'block';
+    ⚠️ No fake prices are generated.
+    No random accuracy is displayed.
+    Signals are calculated only from
+    the live market candles supplied
+    by the configured market-data feed.
 
-                let rsiVal = calculateRSI(prices);
-                let priceDiff = prices[prices.length - 1] - prices[prices.length - 8];
-                let type, cls, win, reason, signalAction;
+</div>
 
-                if (rsiVal <= 38 && priceDiff < 0) {
-                    type = `CALL ▲ [ ${pair} — FIREBASE HIGH ACCURACY UP ]`;
-                    cls = 'signal-call';
-                    win = Math.floor(84 + Math.random() * 8);
-                    reason = `Firebase RTDB Filter Passed: Oversold RSI (${rsiVal}) + Valid Rebound on ${pair} (${expiryText})`;
-                    marketChart.data.datasets[0].borderColor = '#0ecb81';
-                    marketChart.data.datasets[0].backgroundColor = 'rgba(14, 203, 129, 0.08)';
-                    signalAction = 'BUY';
-                } else if (rsiVal >= 62 && priceDiff > 0) {
-                    type = `PUT ▼ [ ${pair} — FIREBASE HIGH ACCURACY DOWN ]`;
-                    cls = 'signal-put';
-                    win = Math.floor(84 + Math.random() * 8);
-                    reason = `Firebase RTDB Filter Passed: Overbought RSI (${rsiVal}) + Valid Rejection on ${pair} (${expiryText})`;
-                    marketChart.data.datasets[0].borderColor = '#f6465d';
-                    marketChart.data.datasets[0].backgroundColor = 'rgba(246, 70, 93, 0.08)';
-                    signalAction = 'SELL';
-                } else {
-                    type = `⏸️ MARKET CHOPPY (SKIPPED)`;
-                    cls = 'signal-wait';
-                    win = 50;
-                    reason = `Firebase Filter: Neutral RSI (${rsiVal}). Signal filtered to prevent loss (${expiryText}).`;
-                    signalAction = 'WAIT';
-                }
 
-                card.className = `signal-card ${cls}`;
-                document.getElementById('signalTitle').innerText = type;
-                document.getElementById('signalSub').innerText = `Accuracy: ${win}% | Expiry: ${expiryText}`;
-                reasonBox.innerHTML = `🧠 <b>Jutt Bot Firebase Pro:</b> ${reason}`;
-                marketChart.update();
+<script>
 
-                const tableBody = document.querySelector('#historyTable tbody');
-                const nowStr = new Date().toTimeString().split(' ')[0];
-                const newRow = document.createElement('tr');
-                const sigText = signalAction === 'BUY' ? '<span style="color:#0ecb81">BUY</span>' : (signalAction === 'SELL' ? '<span style="color:#f6465d">SELL</span>' : '<span style="color:#f0b90b">SKIP</span>');
-                const tfShort = expirySec < 60 ? expirySec + 's' : (expirySec / 60) + 'm';
-                const resultBadge = signalAction === 'WAIT' ? '<span style="color:#f0b90b">SKIPPED</span>' : '<span class="badge-win">✔ ACCURATE</span>';
-                
-                newRow.innerHTML = `
-                    <td>+</td>
-                    <td>${nowStr}</td>
-                    <td>${pair}</td>
-                    <td>${tfShort}</td>
-                    <td>${sigText}</td>
-                    <td>${win}%</td>
-                    <td>${resultBadge}</td>
-                `;
-                tableBody.insertBefore(newRow, tableBody.firstChild);
 
-                startCountdown(expirySec);
-            }, 1500);
-        }
-    </script>
+const chartValues =
+{chart_json};
+
+
+const chartContext =
+document
+.getElementById(
+    "marketChart"
+)
+.getContext("2d");
+
+
+new Chart(
+    chartContext,
+    {{
+
+        type:"line",
+
+        data:{{
+
+            labels:
+            chartValues.map(
+                (_,i)=>i+1
+            ),
+
+            datasets:[{{
+
+                data:chartValues,
+
+                borderColor:
+                "#0ecb81",
+
+                backgroundColor:
+                "rgba(14,203,129,.08)",
+
+                fill:true,
+
+                borderWidth:2,
+
+                pointRadius:0,
+
+                tension:.25
+
+            }}]
+
+        }},
+
+        options:{{
+
+            responsive:true,
+
+            maintainAspectRatio:false,
+
+            plugins:{{
+
+                legend:{{
+                    display:false
+                }}
+
+            }},
+
+            scales:{{
+
+                x:{{
+
+                    display:false
+
+                }},
+
+                y:{{
+
+                    ticks:{{
+
+                        color:
+                        "#848e9c",
+
+                        font:{{
+                            size:8
+                        }}
+
+                    }},
+
+                    grid:{{
+
+                        color:
+                        "#2b313a"
+
+                    }}
+
+                }}
+
+            }}
+
+        }}
+
+    }}
+);
+
+
+let countdownInterval = null;
+
+
+function generateSignal() {{
+
+    const expiry =
+    parseInt(
+        document
+        .getElementById(
+            "expirySelect"
+        )
+        .value
+    );
+
+
+    if (countdownInterval) {{
+
+        clearInterval(
+            countdownInterval
+        );
+
+    }}
+
+
+    let remaining =
+    expiry;
+
+
+    const timer =
+    document
+    .getElementById(
+        "timer"
+    );
+
+
+    timer.innerText =
+    formatTime(
+        remaining
+    );
+
+
+    countdownInterval =
+    setInterval(
+        function() {{
+
+            remaining--;
+
+            timer.innerText =
+            formatTime(
+                Math.max(
+                    remaining,
+                    0
+                )
+            );
+
+
+            if (
+                remaining <= 0
+            ) {{
+
+                clearInterval(
+                    countdownInterval
+                );
+
+                timer.innerText =
+                "READY";
+
+            }}
+
+        }},
+        1000
+    );
+
+}}
+
+
+function formatTime(
+    seconds
+) {{
+
+    const minutes =
+    Math.floor(
+        seconds / 60
+    );
+
+
+    const remainingSeconds =
+    seconds % 60;
+
+
+    return (
+        String(minutes)
+        .padStart(2,"0")
+        + ":"
+        +
+        String(
+            remainingSeconds
+        ).padStart(2,"0")
+    );
+
+}}
+
+</script>
+
+
 </body>
+
 </html>
 """
 
-components.html(html_code, height=750, scrolling=True)
+
+components.html(
+    html_code,
+    height=900,
+    scrolling=True
+)
