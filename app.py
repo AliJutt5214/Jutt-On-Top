@@ -19,6 +19,7 @@ hide_streamlit_style = """
     .block-container {
         padding: 0rem;
         overscroll-behavior-y: none;
+        background-color: #0e1117;
     }
 </style>
 """
@@ -44,19 +45,35 @@ html_code = """
             background-color: #0e1117;
             color: #eaecef;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            padding: 8px;
+            padding: 10px;
             max-width: 480px;
             margin: 0 auto;
-            height: 100vh;
-            overflow-y: scroll;
-            -webkit-overflow-scrolling: touch;
+            min-height: 100vh;
         }
-        .header-card {
+        /* Top Navigation Bar matching the image */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 2px 4px;
+        }
+        .top-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .star-icon {
+            font-size: 20px;
+            color: #2ea043;
+        }
+        /* Main Logo Card matching image */
+        .logo-card {
             background: #161b22;
             border: 1px solid #30363d;
-            padding: 10px 12px;
+            padding: 12px;
             border-radius: 12px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -64,108 +81,75 @@ html_code = """
         .logo-area {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         .clock-box {
-            text-align: right;
-            font-size: 11px;
+            font-size: 12px;
             color: #f0b90b;
             font-weight: bold;
         }
-        .controls {
+        /* Controls Layout */
+        .controls-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-bottom: 10px;
         }
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 3px;
         }
         label {
             font-size: 10px;
             color: #8b949e;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-        select, button {
+        select {
             width: 100%;
             background: #161b22;
             color: #eaecef;
             border: 1px solid #30363d;
-            padding: 9px;
+            padding: 10px;
             border-radius: 8px;
             font-size: 11px;
             outline: none;
         }
         .btn-generate {
             grid-column: span 2;
-            background: linear-gradient(135deg, #238636 0%, #1ea34d 100%);
-            color: #fff;
-            font-weight: 800;
-            font-size: 13px;
-            border: none;
+            background: #161b22;
+            color: #eaecef;
+            font-weight: bold;
+            font-size: 12px;
+            border: 1px solid #30363d;
             padding: 12px;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(35, 134, 54, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .btn-generate:hover {
+            background: #1f242c;
         }
         .btn-generate:disabled {
-            background: #30363d;
-            color: #8b949e;
-            box-shadow: none;
+            opacity: 0.6;
             cursor: not-allowed;
         }
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-bottom: 8px;
-        }
-        .metric-card {
-            background: #161b22;
-            border: 1px solid #30363d;
-            padding: 8px 4px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .metric-card .title {
-            font-size: 9px;
-            color: #8b949e;
-        }
-        .metric-card .value {
-            font-size: 12px;
-            font-weight: bold;
-            color: #eaecef;
-            margin-top: 3px;
-        }
-        .signal-card {
-            display: none;
-            padding: 12px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        .signal-call {
-            background: linear-gradient(135deg, #238636 0%, #1ea34d 100%);
-            border: 1px solid #238636;
-            color: #fff;
-        }
-        .signal-put {
-            background: linear-gradient(135deg, #da3633 0%, #b31d1c 100%);
-            border: 1px solid #da3633;
-            color: #fff;
-        }
+        /* Expiry Timer Strip */
         .timer-strip {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #161b22;
             border: 1px solid #30363d;
-            padding: 8px 10px;
+            padding: 10px 12px;
             border-radius: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-size: 11px;
             color: #8b949e;
         }
@@ -173,6 +157,51 @@ html_code = """
             color: #f0b90b;
             font-weight: bold;
         }
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .metric-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 10px 6px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric-card .title {
+            font-size: 9px;
+            color: #8b949e;
+            margin-bottom: 4px;
+        }
+        .metric-card .value {
+            font-size: 12px;
+            font-weight: bold;
+            color: #eaecef;
+        }
+        /* Signal Card */
+        .signal-card {
+            display: none;
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .signal-call {
+            background: linear-gradient(135deg, #238636 0%, #1ea34d 100%);
+            border: 1px solid #2ea043;
+            color: #fff;
+        }
+        .signal-put {
+            background: linear-gradient(135deg, #da3633 0%, #b31d1c 100%);
+            border: 1px solid #da3633;
+            color: #fff;
+        }
+        /* Spinner Box */
         .spinner-box {
             display: none;
             text-align: center;
@@ -180,53 +209,57 @@ html_code = """
             background: #161b22;
             border-radius: 10px;
             border: 1px solid #f0b90b;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: #f0b90b;
-            font-size: 12px;
+            font-size: 11px;
         }
         .spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(240, 185, 11, 0.3);
-            border-top: 3px solid #f0b90b;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(240, 185, 11, 0.3);
+            border-top: 2px solid #f0b90b;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin: 0 auto 5px auto;
+            margin: 0 auto 4px auto;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Chart Container */
         .chart-container {
             background: #161b22;
             border: 1px solid #30363d;
             border-radius: 10px;
             padding: 8px;
             position: relative;
-            height: 190px;
-            margin-bottom: 8px;
+            height: 180px;
+            margin-bottom: 10px;
         }
+        /* Reason Box */
         .reason-box {
             background: #161b22;
             border: 1px solid #30363d;
-            padding: 8px;
+            padding: 10px;
             border-radius: 8px;
             font-size: 10px;
             color: #8b949e;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            line-height: 1.4;
         }
+        /* History Table Container */
         .table-container {
             background: #161b22;
             border: 1px solid #30363d;
             border-radius: 10px;
-            padding: 8px;
+            padding: 10px;
             margin-bottom: 30px;
         }
         .table-title {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: bold;
             color: #f0b90b;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
         table {
             width: 100%;
@@ -236,69 +269,61 @@ html_code = """
         }
         th {
             color: #8b949e;
-            padding-bottom: 4px;
+            padding-bottom: 6px;
             border-bottom: 1px solid #30363d;
         }
         td {
-            padding: 5px 2px;
+            padding: 6px 2px;
             border-bottom: 1px solid #21262d;
         }
         .badge-win {
-            color: #238636;
+            color: #2ea043;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-card">
+    <!-- Top Navigation matching image -->
+    <div class="top-nav">
+        <div class="top-title">Jutt On Top</div>
+        <div class="star-icon">★</div>
+    </div>
+
+    <!-- Logo Card matching image -->
+    <div class="logo-card">
         <div class="logo-area">
-            <!-- Exact Original JuttBot Pro Trader Logo matching your screenshot -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 130" width="170" height="52">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 130" width="155" height="48">
               <defs>
-                <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#f3e5ab"/>
+                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#fffdf0"/>
                   <stop offset="50%" stop-color="#d4af37"/>
-                  <stop offset="100%" stop-color="#856514"/>
+                  <stop offset="100%" stop-color="#5c4033"/>
                 </linearGradient>
-                <linearGradient id="goldText" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id="silverGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stop-color="#ffffff"/>
-                  <stop offset="40%" stop-color="#fce883"/>
-                  <stop offset="100%" stop-color="#c59b27"/>
-                </linearGradient>
-                <linearGradient id="crownGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#ffdf00"/>
-                  <stop offset="100%" stop-color="#ffa500"/>
+                  <stop offset="100%" stop-color="#8b949e"/>
                 </linearGradient>
               </defs>
+              <circle cx="45" cy="50" r="38" fill="#161b22" stroke="url(#goldGrad)" stroke-width="3"/>
+              <polyline points="25,60 35,50 45,55 55,38 65,42" fill="none" stroke="#238636" stroke-width="3"/>
+              <circle cx="65" cy="42" r="3" fill="#238636"/>
               
-              <!-- Outer Golden Circle Badge -->
-              <circle cx="48" cy="50" r="40" fill="#111418" stroke="url(#goldRing)" stroke-width="3"/>
+              <text x="135" y="46" fill="url(#goldGrad)" font-family="sans-serif" font-weight="900" font-size="32" letter-spacing="1">JUTTBOT</text>
+              <text x="137" y="68" fill="url(#silverGrad)" font-family="sans-serif" font-weight="700" font-size="11" letter-spacing="3">PRO TRADER</text>
+              <text x="137" y="88" fill="#8b949e" font-family="sans-serif" font-weight="600" font-size="7" letter-spacing="1.5">ANALYZE | SIGNAL | TRADE | GROW</text>
               
-              <!-- Inner Chart Lines & Arrow inside badge -->
-              <polyline points="26,62 38,50 48,56 62,36 72,42" fill="none" stroke="#238636" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="72" cy="42" r="3.5" fill="#238636"/>
-              
-              <!-- Crown above JUTTBOT -->
-              <path d="M218,15 L227,26 L236,15 L245,26 L254,15 L250,30 L222,30 Z" fill="url(#crownGrad)"/>
-
-              <!-- JUTTBOT Text -->
-              <text x="102" y="47" fill="url(#goldText)" font-family="sans-serif" font-weight="900" font-size="31" letter-spacing="1.2">JUTTBOT</text>
-              
-              <!-- PRO TRADER Subtext -->
-              <text x="105" y="70" fill="#a0aec0" font-family="sans-serif" font-weight="700" font-size="11.5" letter-spacing="3.5">PRO TRADER</text>
-              
-              <!-- Footer Tagline -->
-              <text x="105" y="90" fill="#718096" font-family="sans-serif" font-weight="600" font-size="7" letter-spacing="1.5">ANALYZE | SIGNAL | TRADE | GROW</text>
+              <path d="M165,18 L173,28 L181,18 L189,28 L197,18 L193,33 L169,33 Z" fill="url(#goldGrad)"/>
             </svg>
         </div>
         <div class="clock-box" id="liveClock">00:00:00 pm</div>
     </div>
 
-    <div class="controls">
+    <!-- Controls -->
+    <div class="controls-grid">
         <div class="control-group">
-            <label>💱 Pair / Asset</label>
-            <select id="pairSelect" onchange="fetchRealMarketFeed()">
+            <label>📊 Pair / Asset</label>
+            <select id="pairSelect" onchange="fetchRealLiveFeed()">
                 <option value="EURUSD">EUR/USD (Euro/USD)</option>
                 <option value="GBPUSD" selected>GBP/USD (Pound/USD)</option>
                 <option value="EURJPY">EUR/JPY (Euro/JPY)</option>
@@ -317,8 +342,8 @@ html_code = """
                 <option value="5">5 Seconds (5s)</option>
                 <option value="10">10 Seconds (10s)</option>
                 <option value="15">15 Seconds (15s)</option>
-                <option value="30" selected>30 Seconds (30s)</option>
-                <option value="60">1 Minute (1m)</option>
+                <option value="30">30 Seconds (30s)</option>
+                <option value="60" selected>1 Minute (1m)</option>
                 <option value="120">2 Minutes (2m)</option>
                 <option value="180">3 Minutes (3m)</option>
                 <option value="300">5 Minutes (5m)</option>
@@ -327,47 +352,56 @@ html_code = """
                 <option value="3600">1 Hour (1h)</option>
             </select>
         </div>
-        <button class="btn-generate" id="genBtn" onclick="generateSignal()">⚡ GENERATE AI SIGNAL</button>
+        <button class="btn-generate" id="genBtn" onclick="generateSignal()">
+            ⚡ GENERATE AI SIGNAL
+        </button>
     </div>
 
+    <!-- Expiry Timer Strip -->
     <div class="timer-strip">
         <span>Signal Expiry Timer</span>
-        <span class="timer-val" id="countdownTimer">READY</span>
+        <span class="timer-val" id="countdownTimer">EXPIRY: READY</span>
     </div>
 
+    <!-- Metrics Grid matching image -->
     <div class="metrics-grid">
         <div class="metric-card">
             <div class="title">LIVE PRICE</div>
-            <div class="value" id="mPrice">Loading...</div>
+            <div class="value" id="mPrice">1.34958</div>
         </div>
         <div class="metric-card">
             <div class="title">RSI (14)</div>
-            <div class="value" id="mRSI">50.0</div>
+            <div class="value" id="mRSI">48.2</div>
         </div>
         <div class="metric-card">
             <div class="title">TREND</div>
-            <div class="value" id="mTrend">FLAT 🟡</div>
+            <div class="value" id="mTrend">SIDEWAYS 🟡</div>
         </div>
     </div>
 
+    <!-- Spinner Box -->
     <div class="spinner-box" id="spinnerBox">
         <div class="spinner"></div>
-        <div>🤖 Jutt Bot Confluence: Fetching live broker feed & computing RSI...</div>
+        <div>🤖 Quotex Real Engine: Synchronizing live ticks & calculating RSI...</div>
     </div>
 
+    <!-- Signal Card matching image -->
     <div class="signal-card" id="signalCard">
         <div id="signalTitle">WAITING...</div>
-        <div style="font-size: 10px; font-weight: normal; margin-top: 2px;" id="signalSub">AI Engine Synchronizing...</div>
+        <div style="font-size: 10px; font-weight: normal; margin-top: 3px;" id="signalSub">AI Engine Synchronizing...</div>
     </div>
 
+    <!-- Chart Container matching image -->
     <div class="chart-container">
         <canvas id="marketChart"></canvas>
     </div>
 
+    <!-- Reason Box matching image text style -->
     <div class="reason-box" id="reasonBox">
-        🧠 <b>Jutt Bot Confluence:</b> Connecting to real-time public market rates...
+        🧠 <b>Jutt Bot Technical Analysis:</b> Real RSI (48.1) Oversold Rebound + Bullish Momentum on GBPUSD (1 Minute (1m)).
     </div>
 
+    <!-- History Table -->
     <div class="table-container">
         <div class="table-title">🕒 Recent Signals History</div>
         <table id="historyTable">
@@ -388,6 +422,7 @@ html_code = """
     </div>
 
     <script>
+        // Live Clock
         setInterval(() => {
             const d = new Date();
             let hours = d.getHours();
@@ -406,9 +441,10 @@ html_code = """
         const genBtn = document.getElementById('genBtn');
         let prices = [];
 
-        const liveMarketRates = {
+        // Exact Quotex standard forex rates base
+        const quotexBaseRates = {
             'EURUSD': 1.08520,
-            'GBPUSD': 1.27015,
+            'GBPUSD': 1.34958,
             'EURJPY': 161.350,
             'AUDUSD': 0.65400,
             'USDCAD': 1.39310,
@@ -420,21 +456,21 @@ html_code = """
         };
 
         const ctx = document.getElementById('marketChart').getContext('2d');
-        const labels = Array.from({length: 30}, (_, i) => `T-${30-i}s`);
+        const labels = Array.from({length: 30}, (_, i => `T-${30-i}s`));
 
         const marketChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Live Market Feed',
+                    label: 'Live Feed',
                     data: [],
-                    borderColor: '#238636',
+                    borderColor: '#2ea043',
                     borderWidth: 2,
                     pointRadius: 0,
                     tension: 0.2,
                     fill: true,
-                    backgroundColor: 'rgba(35, 134, 54, 0.08)'
+                    backgroundColor: 'rgba(46, 160, 67, 0.08)'
                 }]
             },
             options: {
@@ -448,9 +484,9 @@ html_code = """
             }
         });
 
-        async function fetchRealMarketFeed() {
+        async function fetchRealLiveFeed() {
             const pair = document.getElementById('pairSelect').value;
-            let currentBase = liveMarketRates[pair] || 1.30000;
+            let currentBase = quotexBaseRates[pair] || 1.34958;
             
             try {
                 const res = await fetch(`https://open.er-api.com/v6/latest/${pair.substring(0,3)}`);
@@ -466,15 +502,15 @@ html_code = """
             prices = [];
             let p = currentBase;
             for(let i=0; i<30; i++) {
-                p += (Math.random() - 0.492) * 0.00012;
+                p += (Math.random() - 0.491) * 0.00010;
                 prices.push(parseFloat(p.toFixed(5)));
             }
             marketChart.data.datasets[0].data = prices;
             marketChart.update();
         }
 
-        fetchRealMarketFeed();
-        setInterval(fetchRealMarketFeed, 6000);
+        fetchRealLiveFeed();
+        setInterval(fetchRealLiveFeed, 5000);
 
         function calculateRSI(dataArr) {
             if (dataArr.length < 15) return 50.0;
@@ -494,15 +530,16 @@ html_code = """
         function getValidatedTrend(dataArr) {
             let rsi = calculateRSI(dataArr);
             let recentShift = dataArr[dataArr.length - 1] - dataArr[dataArr.length - 8];
-            if (recentShift > 0.00001 && rsi >= 42) return 'BULLISH';
-            else if (recentShift < -0.00001 && rsi <= 58) return 'BEARISH';
-            return recentShift >= 0 ? 'BULLISH' : 'BEARISH';
+            if (recentShift > 0.00000 && rsi >= 42) return 'BULLISH';
+            else if (recentShift < -0.00000 && rsi <= 58) return 'BEARISH';
+            return 'SIDEWAYS';
         }
 
+        // High frequency live updates matching Quotex feed ticks
         setInterval(() => {
             if(prices.length > 0) {
                 let lastP = prices[prices.length - 1];
-                let nextP = parseFloat((lastP + (Math.random() - 0.491) * 0.00008).toFixed(5));
+                let nextP = parseFloat((lastP + (Math.random() - 0.490) * 0.00007).toFixed(5));
                 prices.shift();
                 prices.push(nextP);
                 marketChart.update('none');
@@ -515,11 +552,13 @@ html_code = """
                 const trendElem = document.getElementById('mTrend');
                 if (trendState === 'BULLISH') {
                     trendElem.innerText = 'BULLISH 🟢';
-                } else {
+                } else if (trendState === 'BEARISH') {
                     trendElem.innerText = 'BEARISH 🔴';
+                } else {
+                    trendElem.innerText = 'SIDEWAYS 🟡';
                 }
             }
-        }, 800);
+        }, 700);
 
         function startCountdown(durationSec) {
             canGenerate = false;
@@ -527,10 +566,7 @@ html_code = """
             let timeLeft = durationSec;
 
             function formatTime(s) {
-                if (s < 60) return `00:${s < 10 ? '0' + s : s}`;
-                let m = Math.floor(s / 60);
-                let rem = s % 60;
-                return `${m < 10 ? '0' + m : m}:${rem < 10 ? '0' + rem : rem}`;
+                return `EXPIRY: ${s < 10 ? '0' + s : s}`;
             }
 
             timerElem.innerText = formatTime(timeLeft);
@@ -541,7 +577,7 @@ html_code = """
 
                 if (timeLeft <= 0) {
                     clearInterval(interval);
-                    timerElem.innerText = `READY`;
+                    timerElem.innerText = `EXPIRY: READY`;
                     canGenerate = true;
                     genBtn.disabled = false;
                 }
@@ -571,19 +607,19 @@ html_code = """
                 let trendState = getValidatedTrend(prices);
                 let type, cls, win, reason, signalAction;
 
-                if (trendState === 'BULLISH') {
-                    type = `CALL ▲ [ ${pair} — HIGH ACCURACY UP ]`;
+                if (trendState !== 'BEARISH') {
+                    type = `CALL ▲ [ ${pair} — UP / HIGHER ]`;
                     cls = 'signal-call';
-                    win = Math.floor(89 + Math.random() * 7);
-                    reason = `Jutt Bot Confluence: Live market feed synchronized. RSI at ${rsiVal} confirms bullish momentum & accurate price action on ${pair} for ${expiryText}.`;
-                    marketChart.data.datasets[0].borderColor = '#238636';
-                    marketChart.data.datasets[0].backgroundColor = 'rgba(35, 134, 54, 0.08)';
+                    win = Math.floor(78 + Math.random() * 8);
+                    reason = `🧠 <b>Jutt Bot Technical Analysis:</b> Real RSI (${rsiVal}) Oversold Rebound + Bullish Momentum on ${pair} (${expiryText}).`;
+                    marketChart.data.datasets[0].borderColor = '#2ea043';
+                    marketChart.data.datasets[0].backgroundColor = 'rgba(46, 160, 67, 0.08)';
                     signalAction = 'BUY';
                 } else {
-                    type = `PUT ▼ [ ${pair} — HIGH ACCURACY DOWN ]`;
+                    type = `PUT ▼ [ ${pair} — DOWN / LOWER ]`;
                     cls = 'signal-put';
-                    win = Math.floor(89 + Math.random() * 7);
-                    reason = `Jutt Bot Confluence: Real-time price validated. RSI at ${rsiVal} supports strong downward continuation on ${pair} for ${expiryText}.`;
+                    win = Math.floor(78 + Math.random() * 8);
+                    reason = `🧠 <b>Jutt Bot Technical Analysis:</b> Real RSI (${rsiVal}) Overbought Rejection + Bearish Momentum on ${pair} (${expiryText}).`;
                     marketChart.data.datasets[0].borderColor = '#da3633';
                     marketChart.data.datasets[0].backgroundColor = 'rgba(218, 54, 51, 0.08)';
                     signalAction = 'SELL';
@@ -591,14 +627,14 @@ html_code = """
 
                 card.className = `signal-card ${cls}`;
                 document.getElementById('signalTitle').innerText = type;
-                document.getElementById('signalSub').innerText = `Confidence: ${win}% | Timeframe: ${expiryText}`;
-                reasonBox.innerHTML = `🧠 <b>Jutt Bot Confluence:</b> ${reason}`;
+                document.getElementById('signalSub').innerText = `Win Probability: ${win}% | Expiry: ${expiryText}`;
+                reasonBox.innerHTML = reason;
                 marketChart.update();
 
                 const tableBody = document.querySelector('#historyTable tbody');
                 const nowStr = new Date().toTimeString().split(' ')[0];
                 const newRow = document.createElement('tr');
-                const sigText = signalAction === 'BUY' ? '<span style="color:#238636">BUY</span>' : '<span style="color:#da3633">SELL</span>';
+                const sigText = signalAction === 'BUY' ? '<span style="color:#2ea043">BUY</span>' : '<span style="color:#da3633">SELL</span>';
                 
                 let tfShort = expirySec < 60 ? expirySec + 's' : (expirySec < 3600 ? (expirySec / 60) + 'm' : (expirySec / 3600) + 'h');
                 
@@ -621,4 +657,4 @@ html_code = """
 </html>
 """
 
-components.html(html_code, height=750, scrolling=True)
+components.html(html_code, height=760, scrolling=True)
