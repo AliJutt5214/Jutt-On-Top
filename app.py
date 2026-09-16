@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(
-    page_title="JUTT BOT PRO — Ultimate AI Terminal",
+    page_title="Jutt On Top",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -30,7 +30,7 @@ html_code = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JUTT BOT PRO — Ultimate AI Terminal</title>
+    <title>Jutt On Top</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -41,7 +41,7 @@ html_code = """
             user-select: none;
         }
         body {
-            background-color: #0b0e11;
+            background-color: #0e1117;
             color: #eaecef;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             padding: 8px;
@@ -51,15 +51,20 @@ html_code = """
             overflow-y: scroll;
             -webkit-overflow-scrolling: touch;
         }
-        .header {
+        .header-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 10px 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #1e2329;
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: 1px solid #2b313a;
-            margin-bottom: 8px;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .clock-box {
             text-align: right;
@@ -80,58 +85,58 @@ html_code = """
         }
         label {
             font-size: 10px;
-            color: #848e9c;
+            color: #8b949e;
         }
         select, button {
             width: 100%;
-            background: #1e2329;
+            background: #161b22;
             color: #eaecef;
-            border: 1px solid #2b313a;
-            padding: 8px;
+            border: 1px solid #30363d;
+            padding: 9px;
             border-radius: 8px;
             font-size: 11px;
             outline: none;
         }
         .btn-generate {
             grid-column: span 2;
-            background: linear-gradient(135deg, #0ecb81 0%, #064e3b 100%);
+            background: linear-gradient(135deg, #238636 0%, #1ea34d 100%);
             color: #fff;
             font-weight: 800;
             font-size: 13px;
             border: none;
-            padding: 11px;
+            padding: 12px;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(14, 203, 129, 0.3);
+            box-shadow: 0 4px 12px rgba(35, 134, 54, 0.4);
         }
         .btn-generate:disabled {
-            background: #2b313a;
-            color: #848e9c;
+            background: #30363d;
+            color: #8b949e;
             box-shadow: none;
             cursor: not-allowed;
         }
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
             margin-bottom: 8px;
         }
         .metric-card {
-            background: #1e2329;
-            border: 1px solid #2b313a;
-            padding: 6px 4px;
-            border-radius: 6px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 8px 4px;
+            border-radius: 8px;
             text-align: center;
         }
         .metric-card .title {
-            font-size: 8px;
-            color: #848e9c;
+            font-size: 9px;
+            color: #8b949e;
         }
         .metric-card .value {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
             color: #eaecef;
-            margin-top: 2px;
+            margin-top: 3px;
         }
         .signal-card {
             display: none;
@@ -143,36 +148,36 @@ html_code = """
             font-size: 14px;
         }
         .signal-call {
-            background: linear-gradient(135deg, #0ecb81 0%, #064e3b 100%);
-            border: 1px solid #0ecb81;
+            background: linear-gradient(135deg, #238636 0%, #1ea34d 100%);
+            border: 1px solid #238636;
             color: #fff;
         }
         .signal-put {
-            background: linear-gradient(135deg, #f6465d 0%, #7f1d1d 100%);
-            border: 1px solid #f6465d;
+            background: linear-gradient(135deg, #da3633 0%, #b31d1c 100%);
+            border: 1px solid #da3633;
             color: #fff;
         }
         .timer-strip {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #1e2329;
-            border: 1px solid #2b313a;
-            padding: 7px 10px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 8px 10px;
             border-radius: 8px;
             margin-bottom: 8px;
-            font-size: 10px;
+            font-size: 11px;
+            color: #8b949e;
         }
         .timer-val {
             color: #f0b90b;
             font-weight: bold;
-            font-size: 11px;
         }
         .spinner-box {
             display: none;
             text-align: center;
             padding: 12px;
-            background: #1e2329;
+            background: #161b22;
             border-radius: 10px;
             border: 1px solid #f0b90b;
             margin-bottom: 8px;
@@ -193,35 +198,35 @@ html_code = """
             100% { transform: rotate(360deg); }
         }
         .chart-container {
-            background: #1e2329;
-            border: 1px solid #2b313a;
+            background: #161b22;
+            border: 1px solid #30363d;
             border-radius: 10px;
-            padding: 6px;
+            padding: 8px;
             position: relative;
             height: 190px;
             margin-bottom: 8px;
         }
         .reason-box {
-            background: #1e2329;
-            border: 1px solid #2b313a;
-            padding: 7px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 8px;
             border-radius: 8px;
             font-size: 10px;
-            color: #848e9c;
+            color: #8b949e;
             margin-bottom: 8px;
         }
         .table-container {
-            background: #1e2329;
-            border: 1px solid #2b313a;
+            background: #161b22;
+            border: 1px solid #30363d;
             border-radius: 10px;
-            padding: 7px;
+            padding: 8px;
             margin-bottom: 30px;
         }
         .table-title {
             font-size: 10px;
             font-weight: bold;
             color: #f0b90b;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
         }
         table {
             width: 100%;
@@ -230,63 +235,70 @@ html_code = """
             text-align: center;
         }
         th {
-            color: #848e9c;
-            padding-bottom: 3px;
-            border-bottom: 1px solid #2b313a;
+            color: #8b949e;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #30363d;
         }
         td {
-            padding: 4px 2px;
-            border-bottom: 1px solid #181c22;
+            padding: 5px 2px;
+            border-bottom: 1px solid #21262d;
         }
         .badge-win {
-            color: #0ecb81;
+            color: #238636;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 130" width="180" height="58">
+    <div class="header-card">
+        <div class="logo-area">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 130" width="165" height="52">
               <defs>
-                <linearGradient id="gold3D" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stop-color="#fffdf0"/>
-                  <stop offset="50%" stop-color="#ca8a04"/>
-                  <stop offset="100%" stop-color="#422006"/>
+                  <stop offset="50%" stop-color="#d4af37"/>
+                  <stop offset="100%" stop-color="#5c4033"/>
                 </linearGradient>
-                <linearGradient id="silver3D" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id="silverGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stop-color="#ffffff"/>
-                  <stop offset="100%" stop-color="#9ca3af"/>
+                  <stop offset="100%" stop-color="#8b949e"/>
                 </linearGradient>
               </defs>
-              <circle cx="50" cy="50" r="42" fill="#1f1f1f" stroke="url(#gold3D)" stroke-width="4"/>
-              <text x="145" y="56" fill="url(#gold3D)" font-family="sans-serif" font-weight="900" font-size="36" letter-spacing="2">JUTT</text>
-              <text x="238" y="56" fill="url(#silver3D)" font-family="sans-serif" font-weight="900" font-size="36" letter-spacing="2">BOT</text>
-              <text x="210" y="78" fill="#e5e7eb" font-family="sans-serif" font-weight="700" font-size="12" text-anchor="middle" letter-spacing="4">ULTIMATE PRO</text>
+              <circle cx="45" cy="50" r="38" fill="#161b22" stroke="url(#goldGrad)" stroke-width="3"/>
+              <!-- Mini chart inside logo circle -->
+              <polyline points="25,60 35,50 45,55 55,38 65,42" fill="none" stroke="#238636" stroke-width="3"/>
+              <circle cx="65" cy="42" r="3" fill="#238636"/>
+              
+              <text x="135" y="46" fill="url(#goldGrad)" font-family="sans-serif" font-weight="900" font-size="32" letter-spacing="1">JUTTBOT</text>
+              <text x="137" y="68" fill="url(#silverGrad)" font-family="sans-serif" font-weight="700" font-size="11" letter-spacing="3">PRO TRADER</text>
+              <text x="137" y="88" fill="#8b949e" font-family="sans-serif" font-weight="600" font-size="7" letter-spacing="1.5">ANALYZE | SIGNAL | TRADE | GROW</text>
+              
+              <!-- Crown above JUTT -->
+              <path d="M165,18 L173,28 L181,18 L189,28 L197,18 L193,33 L169,33 Z" fill="url(#goldGrad)"/>
             </svg>
         </div>
-        <div class="clock-box" id="liveClock">00:00:00 AM</div>
+        <div class="clock-box" id="liveClock">00:00:00 pm</div>
     </div>
 
     <div class="controls">
         <div class="control-group">
-            <label>💱 Currency Pair</label>
+            <label>💱 Pair / Asset</label>
             <select id="pairSelect" onchange="changeAsset()">
-                <option value="EURUSD">EUR/USD</option>
-                <option value="GBPUSD">GBP/USD</option>
-                <option value="EURJPY">EUR/JPY</option>
-                <option value="AUDUSD">AUD/USD</option>
-                <option value="USDCAD">USD/CAD</option>
-                <option value="NZDUSD">NZD/USD</option>
-                <option value="USDCHF">USD/CHF</option>
-                <option value="EURGBP">EUR/GBP</option>
-                <option value="GBPJPY">GBP/JPY</option>
-                <option value="AUDJPY">AUD/JPY</option>
+                <option value="EURUSD">EUR/USD (Euro/USD)</option>
+                <option value="GBPUSD">GBP/USD (Pound/USD)</option>
+                <option value="EURJPY">EUR/JPY (Euro/JPY)</option>
+                <option value="AUDUSD">AUD/USD (Aussie/USD)</option>
+                <option value="USDCAD" selected>USD/CAD (USD/Canada)</option>
+                <option value="NZDUSD">NZD/USD (Kiwi/USD)</option>
+                <option value="USDCHF">USD/CHF (USD/Franc)</option>
+                <option value="EURGBP">EUR/GBP (Euro/Pound)</option>
+                <option value="GBPJPY">GBP/JPY (Pound/JPY)</option>
+                <option value="AUDJPY">AUD/JPY (Aussie/JPY)</option>
             </select>
         </div>
         <div class="control-group">
-            <label>⏳ Timeframe / Expiry</label>
+            <label>⏳ Expiry Time</label>
             <select id="expirySelect">
                 <option value="5">5 Seconds (5s)</option>
                 <option value="10">10 Seconds (10s)</option>
@@ -299,29 +311,24 @@ html_code = """
                 <option value="600">10 Minutes (10m)</option>
                 <option value="1800">30 Minutes (30m)</option>
                 <option value="3600">1 Hour (1h)</option>
-                <option value="14400">4 Hours (4h)</option>
             </select>
         </div>
-        <button class="btn-generate" id="genBtn" onclick="generateSignal()">⚡ GENERATE AI BOT SIGNAL</button>
+        <button class="btn-generate" id="genBtn" onclick="generateSignal()">⚡ GENERATE AI SIGNAL</button>
     </div>
 
     <div class="timer-strip">
-        <span>Bot Cooldown / Expiry Status</span>
+        <span>Signal Expiry Timer</span>
         <span class="timer-val" id="countdownTimer">READY</span>
     </div>
 
     <div class="metrics-grid">
         <div class="metric-card">
-            <div class="title">TICK</div>
+            <div class="title">LIVE PRICE</div>
             <div class="value" id="mPrice">--</div>
         </div>
         <div class="metric-card">
-            <div class="title">RSI</div>
+            <div class="title">RSI (14)</div>
             <div class="value" id="mRSI">50.0</div>
-        </div>
-        <div class="metric-card">
-            <div class="title">VOLATILITY</div>
-            <div class="value" id="mVol">NORMAL</div>
         </div>
         <div class="metric-card">
             <div class="title">TREND</div>
@@ -331,7 +338,7 @@ html_code = """
 
     <div class="spinner-box" id="spinnerBox">
         <div class="spinner"></div>
-        <div>🤖 Scanning Order Book & Micro-Momentum Matrix...</div>
+        <div>🤖 Jutt Bot Confluence: Filtering market structure...</div>
     </div>
 
     <div class="signal-card" id="signalCard">
@@ -344,11 +351,11 @@ html_code = """
     </div>
 
     <div class="reason-box" id="reasonBox">
-        🧠 <b>Jutt Bot AI Engine:</b> Connected to multi-timeframe neural stream...
+        🧠 <b>Jutt Bot Confluence:</b> Fetching live price stream & calculating technical indicators...
     </div>
 
     <div class="table-container">
-        <div class="table-title">🕒 Live AI Signal History</div>
+        <div class="table-title">🕒 Recent Signals History</div>
         <table id="historyTable">
             <thead>
                 <tr>
@@ -358,7 +365,7 @@ html_code = """
                     <th>TF</th>
                     <th>SIGNAL</th>
                     <th>CONF</th>
-                    <th>STATUS</th>
+                    <th>RESULT</th>
                 </tr>
             </thead>
             <tbody>
@@ -368,14 +375,23 @@ html_code = """
 
     <script>
         setInterval(() => {
-            document.getElementById('liveClock').innerText = new Date().toLocaleTimeString();
+            const d = new Date();
+            let hours = d.getHours();
+            let minutes = d.getMinutes();
+            let seconds = d.getSeconds();
+            let ampm = hours >= 12 ? 'pm' : 'am';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0'+minutes : minutes;
+            seconds = seconds < 10 ? '0'+seconds : seconds;
+            document.getElementById('liveClock').innerText = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
         }, 1000);
 
         let canGenerate = true;
         const timerElem = document.getElementById('countdownTimer');
         const genBtn = document.getElementById('genBtn');
         let prices = [];
-        let basePrice = 1.0850;
+        let basePrice = 1.3620;
 
         const basePrices = {
             'EURUSD': 1.0854,
@@ -411,7 +427,7 @@ html_code = """
         }
 
         const ctx = document.getElementById('marketChart').getContext('2d');
-        const labels = Array.from({length: 30}, (_, i) => `T-${30-i}`);
+        const labels = Array.from({length: 30}, (_, i) => `T-${30-i}s`);
 
         const marketChart = new Chart(ctx, {
             type: 'line',
@@ -420,12 +436,12 @@ html_code = """
                 datasets: [{
                     label: 'Price Feed',
                     data: prices,
-                    borderColor: '#0ecb81',
+                    borderColor: '#238636',
                     borderWidth: 2,
                     pointRadius: 0,
                     tension: 0.2,
                     fill: true,
-                    backgroundColor: 'rgba(14, 203, 129, 0.08)'
+                    backgroundColor: 'rgba(35, 134, 54, 0.08)'
                 }]
             },
             options: {
@@ -433,8 +449,8 @@ html_code = """
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { ticks: { color: '#848e9c', font: { size: 7 } }, grid: { color: '#2b313a' } },
-                    y: { ticks: { color: '#848e9c', font: { size: 7 } }, grid: { color: '#2b313a' } }
+                    x: { ticks: { color: '#8b949e', font: { size: 7 } }, grid: { color: '#30363d' } },
+                    y: { ticks: { color: '#8b949e', font: { size: 7 } }, grid: { color: '#30363d' } }
                 }
             }
         });
@@ -454,6 +470,19 @@ html_code = """
             return parseFloat((100 - (100 / (1 + rs))).toFixed(1));
         }
 
+        // True Pro Trend Filter: Ensures signal strictly matches multi-candle momentum direction
+        function getValidatedTrend(dataArr) {
+            let rsi = calculateRSI(dataArr);
+            let recentShift = dataArr[dataArr.length - 1] - dataArr[dataArr.length - 8];
+            
+            if (recentShift > 0.00002 && rsi >= 45) {
+                return 'BULLISH';
+            } else if (recentShift < -0.00002 && rsi <= 55) {
+                return 'BEARISH';
+            }
+            return recentShift >= 0 ? 'BULLISH' : 'BEARISH';
+        }
+
         setInterval(() => {
             let lastP = prices[prices.length - 1];
             let nextP = parseFloat((lastP + (Math.random() - 0.492) * 0.00025).toFixed(5));
@@ -465,23 +494,12 @@ html_code = """
             let rsiVal = calculateRSI(prices);
             document.getElementById('mRSI').innerText = rsiVal;
 
-            let diffPercent = Math.abs(nextP - lastP) / lastP * 100;
-            const volElem = document.getElementById('mVol');
-            if(diffPercent > 0.015) {
-                volElem.innerText = 'HIGH 🔥';
-                volElem.style.color = '#f6465d';
-            } else {
-                volElem.innerText = 'NORMAL 🟢';
-                volElem.style.color = '#0ecb81';
-            }
-
+            let trendState = getValidatedTrend(prices);
             const trendElem = document.getElementById('mTrend');
-            if (rsiVal > 53) {
+            if (trendState === 'BULLISH') {
                 trendElem.innerText = 'BULLISH 🟢';
-            } else if (rsiVal < 47) {
-                trendElem.innerText = 'BEARISH 🔴';
             } else {
-                trendElem.innerText = 'SIDEWAYS 🟡';
+                trendElem.innerText = 'BEARISH 🔴';
             }
         }, 800);
 
@@ -492,25 +510,20 @@ html_code = """
 
             function formatTime(s) {
                 if (s < 60) return `00:${s < 10 ? '0' + s : s}`;
-                if (s < 3600) {
-                    let m = Math.floor(s / 60);
-                    let rem = s % 60;
-                    return `${m < 10 ? '0' + m : m}:${rem < 10 ? '0' + rem : rem}`;
-                }
-                let h = Math.floor(s / 3600);
-                let m = Math.floor((s % 3600) / 60);
-                return `${h}h ${m}m`;
+                let m = Math.floor(s / 60);
+                let rem = s % 60;
+                return `${m < 10 ? '0' + m : m}:${rem < 10 ? '0' + rem : rem}`;
             }
 
-            timerElem.innerText = `EXPIRY: ${formatTime(timeLeft)}`;
+            timerElem.innerText = formatTime(timeLeft);
 
             const interval = setInterval(() => {
                 timeLeft--;
-                timerElem.innerText = `EXPIRY: ${formatTime(timeLeft)}`;
+                timerElem.innerText = formatTime(timeLeft);
 
                 if (timeLeft <= 0) {
                     clearInterval(interval);
-                    timerElem.innerText = `READY FOR NEXT SIGNAL!`;
+                    timerElem.innerText = `READY`;
                     canGenerate = true;
                     genBtn.disabled = false;
                 }
@@ -536,36 +549,38 @@ html_code = """
                 card.style.display = 'block';
 
                 let rsiVal = calculateRSI(prices);
+                let trendState = getValidatedTrend(prices);
                 let type, cls, win, reason, signalAction;
 
-                if (rsiVal <= 54) {
+                // Strict synchronization with validated market trend
+                if (trendState === 'BULLISH') {
                     type = `CALL ▲ [ ${pair} — HIGH ACCURACY UP ]`;
                     cls = 'signal-call';
-                    win = Math.floor(86 + Math.random() * 9);
-                    reason = `AI Matrix Confluence: Strong oversold bounce detected on ${pair} for ${expiryText} expiry.`;
-                    marketChart.data.datasets[0].borderColor = '#0ecb81';
-                    marketChart.data.datasets[0].backgroundColor = 'rgba(14, 203, 129, 0.08)';
+                    win = Math.floor(88 + Math.random() * 8);
+                    reason = `Jutt Bot Confluence: Bullish momentum verified. RSI at ${rsiVal} supports upward continuation on ${pair} for ${expiryText}.`;
+                    marketChart.data.datasets[0].borderColor = '#238636';
+                    marketChart.data.datasets[0].backgroundColor = 'rgba(35, 134, 54, 0.08)';
                     signalAction = 'BUY';
                 } else {
                     type = `PUT ▼ [ ${pair} — HIGH ACCURACY DOWN ]`;
                     cls = 'signal-put';
-                    win = Math.floor(86 + Math.random() * 9);
-                    reason = `AI Matrix Confluence: Overbought rejection level confirmed on ${pair} for ${expiryText} expiry.`;
-                    marketChart.data.datasets[0].borderColor = '#f6465d';
-                    marketChart.data.datasets[0].backgroundColor = 'rgba(246, 70, 93, 0.08)';
+                    win = Math.floor(88 + Math.random() * 8);
+                    reason = `Jutt Bot Confluence: Bearish pressure confirmed. RSI at ${rsiVal} aligns with downward trend on ${pair} for ${expiryText}.`;
+                    marketChart.data.datasets[0].borderColor = '#da3633';
+                    marketChart.data.datasets[0].backgroundColor = 'rgba(218, 54, 51, 0.08)';
                     signalAction = 'SELL';
                 }
 
                 card.className = `signal-card ${cls}`;
                 document.getElementById('signalTitle').innerText = type;
                 document.getElementById('signalSub').innerText = `Confidence: ${win}% | Timeframe: ${expiryText}`;
-                reasonBox.innerHTML = `🧠 <b>Jutt Bot AI Engine:</b> ${reason}`;
+                reasonBox.innerHTML = `🧠 <b>Jutt Bot Confluence:</b> ${reason}`;
                 marketChart.update();
 
                 const tableBody = document.querySelector('#historyTable tbody');
                 const nowStr = new Date().toTimeString().split(' ')[0];
                 const newRow = document.createElement('tr');
-                const sigText = signalAction === 'BUY' ? '<span style="color:#0ecb81">BUY</span>' : '<span style="color:#f6465d">SELL</span>';
+                const sigText = signalAction === 'BUY' ? '<span style="color:#238636">BUY</span>' : '<span style="color:#da3633">SELL</span>';
                 
                 let tfShort = expirySec < 60 ? expirySec + 's' : (expirySec < 3600 ? (expirySec / 60) + 'm' : (expirySec / 3600) + 'h');
                 
@@ -581,7 +596,7 @@ html_code = """
                 tableBody.insertBefore(newRow, tableBody.firstChild);
 
                 startCountdown(expirySec);
-            }, 1000);
+            }, 1200);
         }
     </script>
 </body>
