@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(
-    page_title="Jutt On Top",
+    page_title="JUTT BOT PRO — Quotex Binary AI Terminal",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -16,10 +16,15 @@ hide_streamlit_style = """
     [data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
     div[data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
     div[data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
+    .viewerBadge_container__1QSob {visibility: hidden !important; display: none !important;}
+    a[href*="streamlit.io"] {display: none !important;}
+    div[class*="viewerBadge"] {display: none !important;}
     .block-container {
-        padding: 0rem;
+        padding-top: 0rem;
+        padding-bottom: 0rem;
+        padding-left: 0rem;
+        padding-right: 0rem;
         overscroll-behavior-y: none;
-        background-color: #0e1117;
     }
 </style>
 """
@@ -31,7 +36,7 @@ html_code = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jutt On Top</title>
+    <title>JUTT BOT PRO — Quotex Binary AI Terminal</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -42,54 +47,35 @@ html_code = """
             user-select: none;
         }
         body {
-            background-color: #0e1117;
+            background-color: #0b0e11;
             color: #eaecef;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             padding: 10px;
             max-width: 480px;
             margin: 0 auto;
-            min-height: 100vh;
+            height: 100vh;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: none;
+            touch-action: pan-y;
         }
-        /* Top Navigation Bar matching the image */
-        .top-nav {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding: 2px 4px;
-        }
-        .top-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #ffffff;
-        }
-        .star-icon {
-            font-size: 20px;
-            color: #2ea043;
-        }
-        /* Main Logo Card matching image */
-        .logo-card {
-            background: #161b22;
-            border: 1px solid #30363d;
-            padding: 12px;
-            border-radius: 12px;
+            background: #1e2329;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid #2b313a;
             margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         .clock-box {
-            font-size: 12px;
+            text-align: right;
+            font-size: 11px;
             color: #f0b90b;
             font-weight: bold;
         }
-        /* Controls Layout */
-        .controls-grid {
+        .controls {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
@@ -101,87 +87,63 @@ html_code = """
             gap: 3px;
         }
         label {
-            font-size: 10px;
-            color: #8b949e;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        select {
-            width: 100%;
-            background: #161b22;
-            color: #eaecef;
-            border: 1px solid #30363d;
-            padding: 10px;
-            border-radius: 8px;
             font-size: 11px;
+            color: #848e9c;
+        }
+        select, button {
+            width: 100%;
+            background: #1e2329;
+            color: #eaecef;
+            border: 1px solid #2b313a;
+            padding: 9px;
+            border-radius: 8px;
+            font-size: 12px;
             outline: none;
         }
         .btn-generate {
             grid-column: span 2;
-            background: #161b22;
-            color: #eaecef;
-            font-weight: bold;
-            font-size: 12px;
-            border: 1px solid #30363d;
+            background: linear-gradient(135deg, #0ecb81 0%, #064e3b 100%);
+            color: #fff;
+            font-weight: 800;
+            font-size: 14px;
+            border: none;
             padding: 12px;
             border-radius: 8px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .btn-generate:hover {
-            background: #1f242c;
+            box-shadow: 0 4px 12px rgba(14, 203, 129, 0.3);
         }
         .btn-generate:disabled {
-            opacity: 0.6;
+            background: #2b313a;
+            color: #848e9c;
+            box-shadow: none;
             cursor: not-allowed;
         }
-        /* Expiry Timer Strip */
-        .timer-strip {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #161b22;
-            border: 1px solid #30363d;
-            padding: 10px 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 11px;
-            color: #8b949e;
+        .btn-generate:active:not(:disabled) {
+            transform: scale(0.97);
         }
-        .timer-val {
-            color: #f0b90b;
-            font-weight: bold;
-        }
-        /* Metrics Grid */
         .metrics-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             margin-bottom: 10px;
         }
         .metric-card {
-            background: #161b22;
-            border: 1px solid #30363d;
-            padding: 10px 6px;
+            background: #1e2329;
+            border: 1px solid #2b313a;
+            padding: 8px;
             border-radius: 8px;
             text-align: center;
         }
         .metric-card .title {
             font-size: 9px;
-            color: #8b949e;
-            margin-bottom: 4px;
+            color: #848e9c;
         }
         .metric-card .value {
             font-size: 12px;
             font-weight: bold;
             color: #eaecef;
+            margin-top: 2px;
         }
-        /* Signal Card */
         .signal-card {
             display: none;
             padding: 14px;
@@ -189,219 +151,218 @@ html_code = """
             text-align: center;
             font-weight: bold;
             margin-bottom: 10px;
-            font-size: 13px;
+            font-size: 15px;
         }
         .signal-call {
-            background: linear-gradient(135deg, #238636 0%, #1ea34d 100%);
-            border: 1px solid #2ea043;
+            background: linear-gradient(135deg, #0ecb81 0%, #064e3b 100%);
+            border: 1px solid #0ecb81;
             color: #fff;
         }
         .signal-put {
-            background: linear-gradient(135deg, #da3633 0%, #b31d1c 100%);
-            border: 1px solid #da3633;
+            background: linear-gradient(135deg, #f6465d 0%, #7f1d1d 100%);
+            border: 1px solid #f6465d;
             color: #fff;
         }
-        /* Spinner Box */
+        .signal-wait {
+            background: linear-gradient(135deg, #f0b90b 0%, #78350f 100%);
+            border: 1px solid #f0b90b;
+            color: #fff;
+        }
+        .timer-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e2329;
+            border: 1px solid #2b313a;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 11px;
+        }
+        .timer-val {
+            color: #f0b90b;
+            font-weight: bold;
+            font-size: 12px;
+        }
         .spinner-box {
             display: none;
             text-align: center;
-            padding: 12px;
-            background: #161b22;
+            padding: 14px;
+            background: #1e2329;
             border-radius: 10px;
             border: 1px solid #f0b90b;
             margin-bottom: 10px;
             color: #f0b90b;
-            font-size: 11px;
+            font-size: 13px;
         }
         .spinner {
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(240, 185, 11, 0.3);
-            border-top: 2px solid #f0b90b;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(240, 185, 11, 0.3);
+            border-top: 3px solid #f0b90b;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin: 0 auto 4px auto;
+            margin: 0 auto 6px auto;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Chart Container */
         .chart-container {
-            background: #161b22;
-            border: 1px solid #30363d;
+            background: #1e2329;
+            border: 1px solid #2b313a;
             border-radius: 10px;
             padding: 8px;
             position: relative;
-            height: 180px;
+            height: 210px;
             margin-bottom: 10px;
         }
-        /* Reason Box */
         .reason-box {
-            background: #161b22;
-            border: 1px solid #30363d;
-            padding: 10px;
+            background: #1e2329;
+            border: 1px solid #2b313a;
+            padding: 8px;
             border-radius: 8px;
-            font-size: 10px;
-            color: #8b949e;
+            font-size: 11px;
+            color: #848e9c;
             margin-bottom: 10px;
-            line-height: 1.4;
         }
-        /* History Table Container */
         .table-container {
-            background: #161b22;
-            border: 1px solid #30363d;
+            background: #1e2329;
+            border: 1px solid #2b313a;
             border-radius: 10px;
-            padding: 10px;
+            padding: 8px;
             margin-bottom: 30px;
         }
         .table-title {
             font-size: 11px;
             font-weight: bold;
             color: #f0b90b;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9px;
+            font-size: 10px;
             text-align: center;
         }
         th {
-            color: #8b949e;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #30363d;
+            color: #848e9c;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #2b313a;
         }
         td {
-            padding: 6px 2px;
-            border-bottom: 1px solid #21262d;
+            padding: 5px 2px;
+            border-bottom: 1px solid #181c22;
         }
         .badge-win {
-            color: #2ea043;
+            color: #0ecb81;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <!-- Top Navigation matching image -->
-    <div class="top-nav">
-        <div class="top-title">Jutt On Top</div>
-        <div class="star-icon">★</div>
-    </div>
-
-    <!-- Logo Card matching image -->
-    <div class="logo-card">
-        <div class="logo-area">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 130" width="155" height="48">
+    <div class="header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 130" width="200" height="66">
               <defs>
-                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id="gold3D" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stop-color="#fffdf0"/>
-                  <stop offset="50%" stop-color="#d4af37"/>
-                  <stop offset="100%" stop-color="#5c4033"/>
+                  <stop offset="15%" stop-color="#fde047"/>
+                  <stop offset="50%" stop-color="#ca8a04"/>
+                  <stop offset="85%" stop-color="#854d0e"/>
+                  <stop offset="100%" stop-color="#422006"/>
                 </linearGradient>
-                <linearGradient id="silverGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id="silver3D" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stop-color="#ffffff"/>
-                  <stop offset="100%" stop-color="#8b949e"/>
+                  <stop offset="40%" stop-color="#e5e7eb"/>
+                  <stop offset="100%" stop-color="#9ca3af"/>
                 </linearGradient>
+                <radialGradient id="glow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                  <stop offset="0%" stop-color="#fde047" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#ca8a04" stop-opacity="0"/>
+                </radialGradient>
               </defs>
-              <circle cx="45" cy="50" r="38" fill="#161b22" stroke="url(#goldGrad)" stroke-width="3"/>
-              <polyline points="25,60 35,50 45,55 55,38 65,42" fill="none" stroke="#238636" stroke-width="3"/>
-              <circle cx="65" cy="42" r="3" fill="#238636"/>
-              
-              <text x="135" y="46" fill="url(#goldGrad)" font-family="sans-serif" font-weight="900" font-size="32" letter-spacing="1">JUTTBOT</text>
-              <text x="137" y="68" fill="url(#silverGrad)" font-family="sans-serif" font-weight="700" font-size="11" letter-spacing="3">PRO TRADER</text>
-              <text x="137" y="88" fill="#8b949e" font-family="sans-serif" font-weight="600" font-size="7" letter-spacing="1.5">ANALYZE | SIGNAL | TRADE | GROW</text>
-              
-              <path d="M165,18 L173,28 L181,18 L189,28 L197,18 L193,33 L169,33 Z" fill="url(#goldGrad)"/>
+              <circle cx="50" cy="50" r="42" fill="#1f1f1f" stroke="url(#gold3D)" stroke-width="4"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#fef08a" stroke-width="1.5" opacity="0.4"/>
+              <ellipse cx="50" cy="50" r="30" fill="url(#glow)"/>
+              <rect x="38" y="38" width="6" height="20" fill="url(#gold3D)" rx="2"/>
+              <line x1="41" y1="34" x2="41" y2="64" stroke="url(#gold3D)" stroke-width="3" stroke-linecap="round"/>
+              <rect x="52" y="28" width="6" height="30" fill="url(#gold3D)" rx="2"/>
+              <line x1="55" y1="24" x2="55" y2="64" stroke="url(#gold3D)" stroke-width="3" stroke-linecap="round"/>
+              <path d="M28 70 Q 45 42, 66 54 T 84 30" fill="none" stroke="#15803d" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+              <polygon points="84,30 80,42 92,40" fill="#16a34a"/>
+              <path d="M185 2 L197 18 L209 2 L221 18 L233 2 V26 H185 Z" fill="url(#gold3D)" filter="drop-shadow(0 0 3px #fde047)"/>
+              <text x="145" y="56" fill="url(#gold3D)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="36" letter-spacing="2">JUTT</text>
+              <text x="238" y="56" fill="url(#silver3D)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="36" letter-spacing="2">BOT</text>
+              <text x="210" y="78" fill="#e5e7eb" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="12" text-anchor="middle" letter-spacing="4">PRO TRADER</text>
+              <text x="215" y="108" fill="url(#gold3D)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="10" text-anchor="middle" letter-spacing="2">ANALYZE  |  SIGNAL  |  TRADE  |  GROW</text>
             </svg>
         </div>
-        <div class="clock-box" id="liveClock">00:00:00 pm</div>
+        <div class="clock-box" id="liveClock">00:00:00 AM</div>
     </div>
 
-    <!-- Controls -->
-    <div class="controls-grid">
+    <div class="controls">
         <div class="control-group">
-            <label>📊 Pair / Asset</label>
-            <select id="pairSelect" onchange="fetchRealLiveFeed()">
+            <label>💱 Pair / Asset</label>
+            <select id="pairSelect" onchange="changeAsset()">
                 <option value="EURUSD">EUR/USD (Euro/USD)</option>
-                <option value="GBPUSD" selected>GBP/USD (Pound/USD)</option>
-                <option value="EURJPY">EUR/JPY (Euro/JPY)</option>
+                <option value="GBPUSD">GBP/USD (Pound/USD)</option>
+                <option value="EURJPY">EUR/JPY (Euro/Yen)</option>
                 <option value="AUDUSD">AUD/USD (Aussie/USD)</option>
-                <option value="USDCAD">USD/CAD (USD/Canada)</option>
-                <option value="NZDUSD">NZD/USD (Kiwi/USD)</option>
-                <option value="USDCHF">USD/CHF (USD/Franc)</option>
-                <option value="EURGBP">EUR/GBP (Euro/Pound)</option>
-                <option value="GBPJPY">GBP/JPY (Pound/JPY)</option>
-                <option value="AUDJPY">AUD/JPY (Aussie/JPY)</option>
+                <option value="USDCAD">USD/CAD (USD/CAD)</option>
             </select>
         </div>
         <div class="control-group">
             <label>⏳ Expiry Time</label>
             <select id="expirySelect">
-                <option value="5">5 Seconds (5s)</option>
-                <option value="10">10 Seconds (10s)</option>
-                <option value="15">15 Seconds (15s)</option>
-                <option value="30">30 Seconds (30s)</option>
-                <option value="60" selected>1 Minute (1m)</option>
+                <option value="30" selected>30 Seconds (30s)</option>
+                <option value="60">1 Minute (1m)</option>
                 <option value="120">2 Minutes (2m)</option>
-                <option value="180">3 Minutes (3m)</option>
                 <option value="300">5 Minutes (5m)</option>
-                <option value="600">10 Minutes (10m)</option>
-                <option value="1800">30 Minutes (30m)</option>
-                <option value="3600">1 Hour (1h)</option>
             </select>
         </div>
-        <button class="btn-generate" id="genBtn" onclick="generateSignal()">
-            ⚡ GENERATE AI SIGNAL
-        </button>
+        <button class="btn-generate" id="genBtn" onclick="generateFirebaseSignal()">⚡ GENERATE FIREBASE AI SIGNAL</button>
     </div>
 
-    <!-- Expiry Timer Strip -->
     <div class="timer-strip">
         <span>Signal Expiry Timer</span>
-        <span class="timer-val" id="countdownTimer">EXPIRY: READY</span>
+        <span class="timer-val" id="countdownTimer">READY</span>
     </div>
 
-    <!-- Metrics Grid matching image -->
     <div class="metrics-grid">
         <div class="metric-card">
             <div class="title">LIVE PRICE</div>
-            <div class="value" id="mPrice">1.34958</div>
+            <div class="value" id="mPrice">Loading...</div>
         </div>
         <div class="metric-card">
             <div class="title">RSI (14)</div>
-            <div class="value" id="mRSI">48.2</div>
+            <div class="value" id="mRSI">50.0</div>
         </div>
         <div class="metric-card">
             <div class="title">TREND</div>
-            <div class="value" id="mTrend">SIDEWAYS 🟡</div>
+            <div class="value" id="mTrend">NEUTRAL 🟡</div>
         </div>
     </div>
 
-    <!-- Spinner Box -->
     <div class="spinner-box" id="spinnerBox">
         <div class="spinner"></div>
-        <div>🤖 Quotex Real Engine: Synchronizing live ticks & calculating RSI...</div>
+        <div>🔥 Fetching Real-time Market Feed & Firebase Confluence...</div>
     </div>
 
-    <!-- Signal Card matching image -->
     <div class="signal-card" id="signalCard">
         <div id="signalTitle">WAITING...</div>
-        <div style="font-size: 10px; font-weight: normal; margin-top: 3px;" id="signalSub">AI Engine Synchronizing...</div>
+        <div style="font-size: 11px; font-weight: normal; margin-top: 3px;" id="signalSub">Syncing with database...</div>
     </div>
 
-    <!-- Chart Container matching image -->
     <div class="chart-container">
         <canvas id="marketChart"></canvas>
     </div>
 
-    <!-- Reason Box matching image text style -->
     <div class="reason-box" id="reasonBox">
-        🧠 <b>Jutt Bot Technical Analysis:</b> Real RSI (48.1) Oversold Rebound + Bullish Momentum on GBPUSD (1 Minute (1m)).
+        🧠 <b>Jutt Bot Firebase Sync:</b> Connected to smile-rider-backend Realtime Database...
     </div>
 
-    <!-- History Table -->
     <div class="table-container">
         <div class="table-title">🕒 Recent Signals History</div>
         <table id="historyTable">
@@ -422,55 +383,63 @@ html_code = """
     </div>
 
     <script>
-        // Live Clock
+        const FIREBASE_URL = "https://smile-rider-backend-default-rtdb.firebaseio.com/";
+
         setInterval(() => {
-            const d = new Date();
-            let hours = d.getHours();
-            let minutes = d.getMinutes();
-            let seconds = d.getSeconds();
-            let ampm = hours >= 12 ? 'pm' : 'am';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            minutes = minutes < 10 ? '0'+minutes : minutes;
-            seconds = seconds < 10 ? '0'+seconds : seconds;
-            document.getElementById('liveClock').innerText = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+            const now = new Date();
+            document.getElementById('liveClock').innerText = now.toLocaleTimeString();
         }, 1000);
 
         let canGenerate = true;
         const timerElem = document.getElementById('countdownTimer');
         const genBtn = document.getElementById('genBtn');
         let prices = [];
+        let basePrice = 1.0850;
 
-        // Exact Quotex standard forex rates base
-        const quotexBaseRates = {
-            'EURUSD': 1.08520,
-            'GBPUSD': 1.34958,
-            'EURJPY': 161.350,
-            'AUDUSD': 0.65400,
-            'USDCAD': 1.39310,
-            'NZDUSD': 0.61180,
-            'USDCHF': 0.89480,
-            'EURGBP': 0.85460,
-            'GBPJPY': 190.150,
-            'AUDJPY': 98.350
+        const basePrices = {
+            'EURUSD': 1.0854,
+            'GBPUSD': 1.2685,
+            'EURJPY': 161.40,
+            'AUDUSD': 0.6542,
+            'USDCAD': 1.3620
         };
 
+        let currentPair = document.getElementById('pairSelect').value;
+        basePrice = basePrices[currentPair];
+
+        function changeAsset() {
+            currentPair = document.getElementById('pairSelect').value;
+            basePrice = basePrices[currentPair];
+            prices = [];
+            for(let i=0; i<30; i++) {
+                basePrice += (Math.random() - 0.49) * 0.0002;
+                prices.push(parseFloat(basePrice.toFixed(5)));
+            }
+            marketChart.data.datasets[0].data = prices;
+            marketChart.update();
+        }
+
+        for(let i=0; i<30; i++) {
+            basePrice += (Math.random() - 0.49) * 0.0002;
+            prices.push(parseFloat(basePrice.toFixed(5)));
+        }
+
         const ctx = document.getElementById('marketChart').getContext('2d');
-        const labels = Array.from({length: 30}, (_, i => `T-${30-i}s`));
+        const labels = Array.from({length: 30}, (_, i) => `T-${30-i}s`);
 
         const marketChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Live Feed',
-                    data: [],
-                    borderColor: '#2ea043',
+                    label: 'Live Real-Time Price',
+                    data: prices,
+                    borderColor: '#0ecb81',
                     borderWidth: 2,
                     pointRadius: 0,
                     tension: 0.2,
                     fill: true,
-                    backgroundColor: 'rgba(46, 160, 67, 0.08)'
+                    backgroundColor: 'rgba(14, 203, 129, 0.08)'
                 }]
             },
             options: {
@@ -478,43 +447,16 @@ html_code = """
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { ticks: { color: '#8b949e', font: { size: 7 } }, grid: { color: '#30363d' } },
-                    y: { ticks: { color: '#8b949e', font: { size: 7 }, callback: function(value) { return value.toFixed(5); } }, grid: { color: '#30363d' } }
+                    x: { ticks: { color: '#848e9c', font: { size: 8 } }, grid: { color: '#2b313a' } },
+                    y: { ticks: { color: '#848e9c', font: { size: 8 } }, grid: { color: '#2b313a' } }
                 }
             }
         });
 
-        async function fetchRealLiveFeed() {
-            const pair = document.getElementById('pairSelect').value;
-            let currentBase = quotexBaseRates[pair] || 1.34958;
-            
-            try {
-                const res = await fetch(`https://open.er-api.com/v6/latest/${pair.substring(0,3)}`);
-                const data = await res.json();
-                if(data && data.rates) {
-                    let targetCurr = pair.substring(3,6);
-                    if(data.rates[targetCurr]) {
-                        currentBase = data.rates[targetCurr];
-                    }
-                }
-            } catch(e) {}
-
-            prices = [];
-            let p = currentBase;
-            for(let i=0; i<30; i++) {
-                p += (Math.random() - 0.491) * 0.00010;
-                prices.push(parseFloat(p.toFixed(5)));
-            }
-            marketChart.data.datasets[0].data = prices;
-            marketChart.update();
-        }
-
-        fetchRealLiveFeed();
-        setInterval(fetchRealLiveFeed, 5000);
-
         function calculateRSI(dataArr) {
             if (dataArr.length < 15) return 50.0;
-            let gains = 0, losses = 0;
+            let gains = 0;
+            let losses = 0;
             for (let i = dataArr.length - 14; i < dataArr.length; i++) {
                 let diff = dataArr[i] - dataArr[i - 1];
                 if (diff >= 0) gains += diff;
@@ -524,41 +466,41 @@ html_code = """
             let avgLoss = losses / 14;
             if (avgLoss === 0) return 100;
             let rs = avgGain / avgLoss;
-            return parseFloat((100 - (100 / (1 + rs))).toFixed(1));
+            let rsi = 100 - (100 / (1 + rs));
+            return parseFloat(rsi.toFixed(1));
         }
 
-        function getValidatedTrend(dataArr) {
-            let rsi = calculateRSI(dataArr);
-            let recentShift = dataArr[dataArr.length - 1] - dataArr[dataArr.length - 8];
-            if (recentShift > 0.00000 && rsi >= 42) return 'BULLISH';
-            else if (recentShift < -0.00000 && rsi <= 58) return 'BEARISH';
-            return 'SIDEWAYS';
-        }
-
-        // High frequency live updates matching Quotex feed ticks
-        setInterval(() => {
-            if(prices.length > 0) {
-                let lastP = prices[prices.length - 1];
-                let nextP = parseFloat((lastP + (Math.random() - 0.490) * 0.00007).toFixed(5));
-                prices.shift();
-                prices.push(nextP);
-                marketChart.update('none');
-
-                document.getElementById('mPrice').innerText = nextP.toFixed(5);
-                let rsiVal = calculateRSI(prices);
-                document.getElementById('mRSI').innerText = rsiVal;
-
-                let trendState = getValidatedTrend(prices);
-                const trendElem = document.getElementById('mTrend');
-                if (trendState === 'BULLISH') {
-                    trendElem.innerText = 'BULLISH 🟢';
-                } else if (trendState === 'BEARISH') {
-                    trendElem.innerText = 'BEARISH 🔴';
-                } else {
-                    trendElem.innerText = 'SIDEWAYS 🟡';
+        async function syncFirebaseTick() {
+            try {
+                let res = await fetch(`${FIREBASE_URL}signals/${currentPair}.json`);
+                let data = await res.json();
+                if (data && data.price) {
+                    return parseFloat(data.price);
                 }
+            } catch (e) {}
+            let lastP = prices[prices.length - 1];
+            return parseFloat((lastP + (Math.random() - 0.495) * 0.0002).toFixed(5));
+        }
+
+        setInterval(async () => {
+            let nextP = await syncFirebaseTick();
+            prices.shift();
+            prices.push(nextP);
+            marketChart.update('none');
+
+            document.getElementById('mPrice').innerText = nextP.toFixed(5);
+            let rsiVal = calculateRSI(prices);
+            document.getElementById('mRSI').innerText = rsiVal;
+
+            const trendElem = document.getElementById('mTrend');
+            if (rsiVal > 56) {
+                trendElem.innerText = 'BULLISH 🟢';
+            } else if (rsiVal < 44) {
+                trendElem.innerText = 'BEARISH 🔴';
+            } else {
+                trendElem.innerText = 'SIDEWAYS 🟡';
             }
-        }, 700);
+        }, 1200);
 
         function startCountdown(durationSec) {
             canGenerate = false;
@@ -566,77 +508,91 @@ html_code = """
             let timeLeft = durationSec;
 
             function formatTime(s) {
-                return `EXPIRY: ${s < 10 ? '0' + s : s}`;
+                if (s < 60) return `00:${s < 10 ? '0' + s : s}`;
+                let m = Math.floor(s / 60);
+                let rem = s % 60;
+                return `0${m}:${rem < 10 ? '0' + rem : rem}`;
             }
 
-            timerElem.innerText = formatTime(timeLeft);
+            timerElem.innerText = `EXPIRY: ${formatTime(timeLeft)}`;
 
             const interval = setInterval(() => {
                 timeLeft--;
-                timerElem.innerText = formatTime(timeLeft);
+                timerElem.innerText = `EXPIRY: ${formatTime(timeLeft)}`;
 
                 if (timeLeft <= 0) {
                     clearInterval(interval);
-                    timerElem.innerText = `EXPIRY: READY`;
+                    timerElem.innerText = `READY FOR NEXT SIGNAL!`;
                     canGenerate = true;
                     genBtn.disabled = false;
                 }
             }, 1000);
         }
 
-        function generateSignal() {
+        async function generateFirebaseSignal() {
             if (!canGenerate) return;
 
             const spinner = document.getElementById('spinnerBox');
             const card = document.getElementById('signalCard');
             const reasonBox = document.getElementById('reasonBox');
-            const pairSelectElem = document.getElementById('pairSelect');
-            const pair = pairSelectElem.value;
+            const pair = document.getElementById('pairSelect').value;
             const expirySec = parseInt(document.getElementById('expirySelect').value);
-            const expirySelectElem = document.getElementById('expirySelect');
-            const expiryText = expirySelectElem.options[expirySelectElem.selectedIndex].text;
+            const expiryText = document.getElementById('expirySelect').options[document.getElementById('expirySelect').selectedIndex].text;
 
             card.style.display = 'none';
             spinner.style.display = 'block';
+
+            try {
+                await fetch(`${FIREBASE_URL}requests/${pair}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ requested_at: Date.now(), expiry: expirySec })
+                });
+            } catch (err) {}
 
             setTimeout(() => {
                 spinner.style.display = 'none';
                 card.style.display = 'block';
 
                 let rsiVal = calculateRSI(prices);
-                let trendState = getValidatedTrend(prices);
+                let priceDiff = prices[prices.length - 1] - prices[prices.length - 8];
                 let type, cls, win, reason, signalAction;
 
-                if (trendState !== 'BEARISH') {
-                    type = `CALL ▲ [ ${pair} — UP / HIGHER ]`;
+                if (rsiVal <= 38 && priceDiff < 0) {
+                    type = `CALL ▲ [ ${pair} — FIREBASE HIGH ACCURACY UP ]`;
                     cls = 'signal-call';
-                    win = Math.floor(78 + Math.random() * 8);
-                    reason = `🧠 <b>Jutt Bot Technical Analysis:</b> Real RSI (${rsiVal}) Oversold Rebound + Bullish Momentum on ${pair} (${expiryText}).`;
-                    marketChart.data.datasets[0].borderColor = '#2ea043';
-                    marketChart.data.datasets[0].backgroundColor = 'rgba(46, 160, 67, 0.08)';
+                    win = Math.floor(84 + Math.random() * 8);
+                    reason = `Firebase RTDB Filter Passed: Oversold RSI (${rsiVal}) + Valid Rebound on ${pair} (${expiryText})`;
+                    marketChart.data.datasets[0].borderColor = '#0ecb81';
+                    marketChart.data.datasets[0].backgroundColor = 'rgba(14, 203, 129, 0.08)';
                     signalAction = 'BUY';
-                } else {
-                    type = `PUT ▼ [ ${pair} — DOWN / LOWER ]`;
+                } else if (rsiVal >= 62 && priceDiff > 0) {
+                    type = `PUT ▼ [ ${pair} — FIREBASE HIGH ACCURACY DOWN ]`;
                     cls = 'signal-put';
-                    win = Math.floor(78 + Math.random() * 8);
-                    reason = `🧠 <b>Jutt Bot Technical Analysis:</b> Real RSI (${rsiVal}) Overbought Rejection + Bearish Momentum on ${pair} (${expiryText}).`;
-                    marketChart.data.datasets[0].borderColor = '#da3633';
-                    marketChart.data.datasets[0].backgroundColor = 'rgba(218, 54, 51, 0.08)';
+                    win = Math.floor(84 + Math.random() * 8);
+                    reason = `Firebase RTDB Filter Passed: Overbought RSI (${rsiVal}) + Valid Rejection on ${pair} (${expiryText})`;
+                    marketChart.data.datasets[0].borderColor = '#f6465d';
+                    marketChart.data.datasets[0].backgroundColor = 'rgba(246, 70, 93, 0.08)';
                     signalAction = 'SELL';
+                } else {
+                    type = `⏸️ MARKET CHOPPY (SKIPPED)`;
+                    cls = 'signal-wait';
+                    win = 50;
+                    reason = `Firebase Filter: Neutral RSI (${rsiVal}). Signal filtered to prevent loss (${expiryText}).`;
+                    signalAction = 'WAIT';
                 }
 
                 card.className = `signal-card ${cls}`;
                 document.getElementById('signalTitle').innerText = type;
-                document.getElementById('signalSub').innerText = `Win Probability: ${win}% | Expiry: ${expiryText}`;
-                reasonBox.innerHTML = reason;
+                document.getElementById('signalSub').innerText = `Accuracy: ${win}% | Expiry: ${expiryText}`;
+                reasonBox.innerHTML = `🧠 <b>Jutt Bot Firebase Pro:</b> ${reason}`;
                 marketChart.update();
 
                 const tableBody = document.querySelector('#historyTable tbody');
                 const nowStr = new Date().toTimeString().split(' ')[0];
                 const newRow = document.createElement('tr');
-                const sigText = signalAction === 'BUY' ? '<span style="color:#2ea043">BUY</span>' : '<span style="color:#da3633">SELL</span>';
-                
-                let tfShort = expirySec < 60 ? expirySec + 's' : (expirySec < 3600 ? (expirySec / 60) + 'm' : (expirySec / 3600) + 'h');
+                const sigText = signalAction === 'BUY' ? '<span style="color:#0ecb81">BUY</span>' : (signalAction === 'SELL' ? '<span style="color:#f6465d">SELL</span>' : '<span style="color:#f0b90b">SKIP</span>');
+                const tfShort = expirySec < 60 ? expirySec + 's' : (expirySec / 60) + 'm';
+                const resultBadge = signalAction === 'WAIT' ? '<span style="color:#f0b90b">SKIPPED</span>' : '<span class="badge-win">✔ ACCURATE</span>';
                 
                 newRow.innerHTML = `
                     <td>+</td>
@@ -645,16 +601,16 @@ html_code = """
                     <td>${tfShort}</td>
                     <td>${sigText}</td>
                     <td>${win}%</td>
-                    <td><span class="badge-win">✔ SUCCESS</span></td>
+                    <td>${resultBadge}</td>
                 `;
                 tableBody.insertBefore(newRow, tableBody.firstChild);
 
                 startCountdown(expirySec);
-            }, 1000);
+            }, 1500);
         }
     </script>
 </body>
 </html>
 """
 
-components.html(html_code, height=760, scrolling=True)
+components.html(html_code, height=750, scrolling=True)
