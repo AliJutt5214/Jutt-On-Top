@@ -184,15 +184,6 @@ div.stButton > button {
 .signal-title { color: #ffffff; font-size: 27px; font-weight: 900; }
 .signal-sub { color: #ffffff; font-size: 14px; margin-top: 6px; }
 
-.chart-panel {
-    background: #080d12;
-    border: 1px solid #2d3943;
-    border-radius: 17px;
-    padding: 10px;
-    margin-bottom: 14px;
-}
-
-.chart-heading { color: #dce3e8; font-size: 15px; font-weight: 800; padding: 8px; }
 .footer { text-align: center; color: #65717c; font-size: 10px; letter-spacing: 3px; padding: 18px; }
 </style>
 """)
@@ -461,10 +452,10 @@ if generate and signal_data:
     st.session_state.recent_signals.insert(0, new_signal)
     st.session_state.recent_signals = st.session_state.recent_signals[:10]
 
-html('<div class="panel"><div class="recent-title">📋 RECENT SIGNALS</div></div>')
+html('<div class="panel">📋 RECENT SIGNALS</div>')
 if st.session_state.recent_signals:
     st.dataframe(pd.DataFrame(st.session_state.recent_signals), use_container_width=True, hide_index=True)
 else:
     st.info("No signals generated yet.")
 
-html('<div class="footer">JUTT BOT PRO • ANALYZE | SIGNAL | TRADE | GROW</div>'
+html('<div class="footer">JUTT BOT PRO • ANALYZE | SIGNAL | TRADE | GROW</div>')
