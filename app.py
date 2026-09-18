@@ -6,6 +6,7 @@ import os
 import base64
 import textwrap
 from datetime import datetime
+from streamlit_autorefresh import st_autorefresh
 from ta.momentum import RSIIndicator
 from ta.trend import EMAIndicator
 from ta.volatility import AverageTrueRange
@@ -21,6 +22,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# Auto refresh every 2 seconds for live clock & real-time feel
+st_autorefresh(interval=2000, key="jutt_live_timer")
+
 # ============================================================
 # HTML RENDER FIX
 # ============================================================
@@ -32,7 +36,7 @@ def html(content):
     )
 
 # ============================================================
-# CSS (EXACT MATCH SCREENSHOT LAYOUT)
+# CSS (EXACT MATCH & MOBILE OPTIMIZED)
 # ============================================================
 
 html("""
@@ -85,21 +89,21 @@ header, footer, #MainMenu, [data-testid="stToolbar"], [data-testid="stStatusWidg
 .logo-container {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .logo-img {
-    width: 36px;
-    height: 36px;
+    width: 45px;
+    height: 45px;
     object-fit: contain;
-    border-radius: 8px;
-    border: 1px solid #ffd338;
+    border-radius: 10px;
+    border: 2px solid #ffd338;
 }
 
 .brand-text-sm {
     color: #ffd338;
-    font-size: 14px;
-    font-weight: 800;
+    font-size: 15px;
+    font-weight: 900;
     line-height: 1.1;
 }
 
@@ -220,7 +224,7 @@ div.stButton > button {
 """)
 
 # ============================================================
-# BINANCE CONSTANTS & FOREX/CRYPTO SYMBOLS MAPPING
+# BINANCE CONSTANTS & PAIRS CONFIGURATION
 # ============================================================
 
 BINANCE_HOSTS = [
@@ -237,11 +241,11 @@ PAIRS = [
 ]
 
 PAIR_NAMES = {
-    "BTCUSDT": "BTC/USDT (Bitcoin)", "ETHUSDT": "ETH/USDT (Ethereum)",
-    "SOLUSDT": "SOL/USDT (Solana)", "BNBUSDT": "BNB/USDT (BNB)",
-    "XRPUSDT": "XRP/USDT (XRP)", "ADAUSDT": "ADA/USDT (Cardano)",
-    "DOGEUSDT": "DOGE/USDT (Dogecoin)", "AVAXUSDT": "AVAX/USDT (Avalanche)",
-    "LINKUSDT": "LINK/USDT (Chainlink)", "LTCUSDT": "LTC/USDT (Litecoin)"
+    "BTCUSDT": "BTC / USDT (Bitcoin)", "ETHUSDT": "ETH / USDT (Ethereum)",
+    "SOLUSDT": "SOL / USDT (Solana)", "BNBUSDT": "BNB / USDT (BNB)",
+    "XRPUSDT": "XRP / USDT (XRP)", "ADAUSDT": "ADA / USDT (Cardano)",
+    "DOGEUSDT": "DOGE / USDT (Dogecoin)", "AVAXUSDT": "AVAX / USDT (Avalanche)",
+    "LINKUSDT": "LINK / USDT (Chainlink)", "LTCUSDT": "LTC / USDT (Litecoin)"
 }
 
 TV_SYMBOLS = {
@@ -320,7 +324,7 @@ def analyze_market(df):
     return {"signal": signal, "confidence": conf, "price": price, "rsi": rsi, "atr": atr, "trend": trend}
 
 # ============================================================
-# HEADER & LOGO
+# LIVE HEADER & OFFICIAL GOLDEN LOGO
 # ============================================================
 
 logo_path = "jutt_bot_logo.png"
@@ -329,7 +333,7 @@ if os.path.exists(logo_path):
         logo_b64 = base64.b64encode(f.read()).decode()
     logo_img_tag = f'<img src="data:image/png;base64,{logo_b64}" class="logo-img">'
 else:
-    logo_img_tag = '<span style="font-size:24px;">⭐</span>'
+    logo_img_tag = '<span style="font-size:28px;">⭐</span>'
 
 current_time_str = datetime.now().strftime("%I:%M:%S %p").lower()
 
@@ -352,12 +356,12 @@ html(f"""
 """)
 
 # ============================================================
-# CONTROLS & INPUTS
+# CONTROLS PANEL (BINANCE PAIRS & EXPIRY TIMEFRAMES)
 # ============================================================
 
 html('<div class="panel">')
 pair = st.selectbox("Pair / Asset", PAIRS, format_func=lambda x: PAIR_NAMES[x])
-expiry_name = st.selectbox("Expiry Time", list(TIMEFRAMES.keys()))
+expiry_name = st.selectbox("Expiry Time / Candle Interval", list(TIMEFRAMES.keys()))
 timeframe = TIMEFRAMES[expiry_name]
 generate = st.button("⚡ GENERATE AI SIGNAL")
 html('</div>')
@@ -407,7 +411,7 @@ if generate:
         st.session_state["signal_tf"] = timeframe
 
 sig_data = st.session_state.get("signal_data")
-if sig_data and (st.session_state.get("signal_pair") != pair or st.session_state.get("signal_tf") != timeframe):
+if sig_data and (st.session_state.get("signal_pair"] != pair or st.session_state.get("signal_tf") != timeframe):
     sig_data = None
 
 clean_pair_name = pair.replace("USDT", " / USDT")
@@ -425,7 +429,7 @@ if sig_data:
     else:
         html(f"""
         <div class="signal-put">
-            <div class="sig-title">PUT ▼ [ {clean_pair_name} — DOWN / LOWER ]</div>
+            <div class="sig-title">▼ PUT ▼ [ {clean_pair_name} — DOWN / LOWER ]</div>
             <div class="sig-sub">Win Probability: {conf}% | Expiry: {expiry_name}</div>
         </div>
         """)
@@ -442,6 +446,8 @@ else:
 # ============================================================
 
 tv_symbol = TV_SYMBOLS.get(pair, "BINANCE:BTCUSDT")
+tv_interval_map = {"1m": "1", "3m": "3", "5m": "5", "15m": "15", "30m": "30", "1h": "60"}
+tv_interval = tv_interval_map.get(timeframe, "1")
 
 chart_html = f"""
 <div style="background:#10171d; border:1px solid #303c47; border-radius:14px; padding:8px; margin-top:10px;">
@@ -452,7 +458,7 @@ chart_html = f"""
         "width": "100%",
         "height": "380",
         "symbol": "{tv_symbol}",
-        "interval": "1",
+        "interval": "{tv_interval}",
         "timezone": "Etc/UTC",
         "theme": "dark",
         "style": "1",
