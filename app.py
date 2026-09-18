@@ -44,23 +44,11 @@ html, body, [class*="css"] {
 }
 
 .stApp {
-    background:
-        radial-gradient(circle at 50% -10%, #17251c 0%, #080d11 38%, #040608 80%);
+    background: radial-gradient(circle at 50% -10%, #17251c 0%, #080d11 38%, #040608 80%);
     color: #ffffff !important;
 }
 
-header,
-footer,
-#MainMenu,
-[data-testid="stToolbar"],
-[data-testid="stStatusWidget"],
-[data-testid="stDecoration"],
-[data-testid="stHeader"],
-[data-testid="stBottom"],
-[data-testid="stDeployButton"],
-[data-testid="stAppDeployButton"],
-.viewerBadge_container__1QSob,
-[class*="viewerBadge"] {
+header, footer, #MainMenu, [data-testid="stToolbar"], [data-testid="stStatusWidget"], [data-testid="stDecoration"], [data-testid="stHeader"], [data-testid="stBottom"], [data-testid="stDeployButton"], [data-testid="stAppDeployButton"], .viewerBadge_container__1QSob, [class*="viewerBadge"] {
     display: none !important;
     visibility: hidden !important;
 }
@@ -71,21 +59,13 @@ footer,
     padding-bottom: 20px !important;
 }
 
-/* ================= HERO ================= */
-
 .hero {
-    background:
-        radial-gradient(circle at 50% 40%, rgba(255,193,7,.14), transparent 38%),
-        linear-gradient(125deg, #05080b, #10171b, #06090c);
-
+    background: radial-gradient(circle at 50% 40%, rgba(255,193,7,.14), transparent 38%), linear-gradient(125deg, #05080b, #10171b, #06090c);
     border: 2px solid #d6aa2c;
     border-radius: 22px;
     padding: 20px;
     margin-bottom: 15px;
-
-    box-shadow:
-        0 0 35px rgba(255,193,7,.12),
-        inset 0 0 35px rgba(255,193,7,.025);
+    box-shadow: 0 0 35px rgba(255,193,7,.12), inset 0 0 35px rgba(255,193,7,.025);
 }
 
 .hero-grid {
@@ -112,40 +92,11 @@ footer,
     border-radius: 18px;
 }
 
-.brand-area {
-    text-align: center;
-}
-
-.brand-main {
-    color: #ffd338;
-    font-size: 52px;
-    font-weight: 900;
-    letter-spacing: 3px;
-    line-height: 1;
-}
-
-.brand-pro {
-    color: #ffffff;
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 7px;
-    margin-top: 8px;
-}
-
-.brand-tag {
-    color: #ffd02f;
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 3px;
-    margin-top: 13px;
-}
-
-.brand-sub {
-    color: #9ba7b2;
-    font-size: 10px;
-    letter-spacing: 2px;
-    margin-top: 9px;
-}
+.brand-area { text-align: center; }
+.brand-main { color: #ffd338; font-size: 52px; font-weight: 900; letter-spacing: 3px; line-height: 1; }
+.brand-pro { color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 7px; margin-top: 8px; }
+.brand-tag { color: #ffd02f; font-size: 14px; font-weight: 800; letter-spacing: 3px; margin-top: 13px; }
+.brand-sub { color: #9ba7b2; font-size: 10px; letter-spacing: 2px; margin-top: 9px; }
 
 .live-card {
     background: #10171c;
@@ -155,24 +106,9 @@ footer,
     text-align: center;
 }
 
-.live-title {
-    color: #a9b2bc;
-    font-size: 13px;
-}
-
-.live-dot {
-    color: #19e86c;
-    font-size: 18px;
-}
-
-.live-time {
-    color: #ffd02f;
-    font-size: 19px;
-    font-weight: 900;
-    margin-top: 7px;
-}
-
-/* ================= PANEL ================= */
+.live-title { color: #a9b2bc; font-size: 13px; }
+.live-dot { color: #19e86c; font-size: 18px; }
+.live-time { color: #ffd02f; font-size: 19px; font-weight: 900; margin-top: 7px; }
 
 .panel {
     background: linear-gradient(145deg, #10171d, #090e13);
@@ -182,41 +118,25 @@ footer,
     margin-bottom: 14px;
 }
 
-/* ================= SELECT ================= */
-
 div[data-baseweb="select"] > div {
     background: #10171d !important;
     border: 1px solid #34414c !important;
     border-radius: 12px !important;
 }
 
-div[data-baseweb="select"] span {
-    color: #ffffff !important;
-}
-
-label {
-    color: #aab4bf !important;
-}
-
-/* ================= BUTTON ================= */
+div[data-baseweb="select"] span { color: #ffffff !important; }
+label { color: #aab4bf !important; }
 
 div.stButton > button {
     height: 58px;
-
     background: linear-gradient(135deg, #f2ba1d, #ffd33d);
-
     border: 1px solid #ffe47d;
     border-radius: 15px;
-
     color: #090909 !important;
-
     font-size: 20px;
     font-weight: 900;
-
     box-shadow: 0 0 25px rgba(255,193,7,.15);
 }
-
-/* ================= METRICS ================= */
 
 .metric-card {
     background: linear-gradient(145deg, #11191f, #0b1015);
@@ -227,32 +147,12 @@ div.stButton > button {
     text-align: center;
 }
 
-.metric-title {
-    color: #8f9aa5;
-    font-size: 12px;
-    letter-spacing: 1px;
-}
+.metric-title { color: #8f9aa5; font-size: 12px; letter-spacing: 1px; }
+.metric-value { color: #ffffff; font-size: 22px; font-weight: 900; margin-top: 8px; }
 
-.metric-value {
-    color: #ffffff;
-    font-size: 22px;
-    font-weight: 900;
-    margin-top: 8px;
-}
-
-.green {
-    color: #20e875 !important;
-}
-
-.red {
-    color: #ff5261 !important;
-}
-
-.yellow {
-    color: #ffd02f !important;
-}
-
-/* ================= SIGNAL ================= */
+.green { color: #20e875 !important; }
+.red { color: #ff5261 !important; }
+.yellow { color: #ffd02f !important; }
 
 .signal-call {
     background: linear-gradient(135deg, #087d38, #20b953);
@@ -281,19 +181,8 @@ div.stButton > button {
     margin: 15px 0;
 }
 
-.signal-title {
-    color: #ffffff;
-    font-size: 27px;
-    font-weight: 900;
-}
-
-.signal-sub {
-    color: #ffffff;
-    font-size: 14px;
-    margin-top: 6px;
-}
-
-/* ================= CHART ================= */
+.signal-title { color: #ffffff; font-size: 27px; font-weight: 900; }
+.signal-sub { color: #ffffff; font-size: 14px; margin-top: 6px; }
 
 .chart-panel {
     background: #080d12;
@@ -303,59 +192,13 @@ div.stButton > button {
     margin-bottom: 14px;
 }
 
-.chart-heading {
-    color: #dce3e8;
-    font-size: 15px;
-    font-weight: 800;
-    padding: 8px;
-}
-
-/* ================= FOOTER ================= */
-
-.footer {
-    text-align: center;
-    color: #65717c;
-    font-size: 10px;
-    letter-spacing: 3px;
-    padding: 18px;
-}
-
-/* ================= MOBILE ================= */
-
-@media(max-width:900px) {
-
-    .hero-grid {
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
-
-    .logo-box {
-        width: 170px;
-        height: 140px;
-    }
-
-    .brand-main {
-        font-size: 40px;
-    }
-
-    .brand-pro {
-        font-size: 17px;
-    }
-
-    .brand-tag {
-        font-size: 10px;
-    }
-
-    .live-card {
-        width: 180px;
-        margin: auto;
-    }
-}
+.chart-heading { color: #dce3e8; font-size: 15px; font-weight: 800; padding: 8px; }
+.footer { text-align: center; color: #65717c; font-size: 10px; letter-spacing: 3px; padding: 18px; }
 </style>
 """)
 
 # ============================================================
-# BINANCE
+# BINANCE CONSTANTS
 # ============================================================
 
 BINANCE_HOSTS = [
@@ -366,140 +209,63 @@ BINANCE_HOSTS = [
 ]
 
 PAIRS = [
-    "BTCUSDT",
-    "ETHUSDT",
-    "SOLUSDT",
-    "BNBUSDT",
-    "XRPUSDT",
-    "ADAUSDT",
-    "DOGEUSDT",
-    "AVAXUSDT",
-    "LINKUSDT",
-    "LTCUSDT"
+    "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT",
+    "ADAUSDT", "DOGEUSDT", "AVAXUSDT", "LINKUSDT", "LTCUSDT"
 ]
 
 PAIR_NAMES = {
-    "BTCUSDT": "BTCUSDT (Bitcoin)",
-    "ETHUSDT": "ETHUSDT (Ethereum)",
-    "SOLUSDT": "SOLUSDT (Solana)",
-    "BNBUSDT": "BNBUSDT (BNB)",
-    "XRPUSDT": "XRPUSDT (XRP)",
-    "ADAUSDT": "ADAUSDT (Cardano)",
-    "DOGEUSDT": "DOGEUSDT (Dogecoin)",
-    "AVAXUSDT": "AVAXUSDT (Avalanche)",
-    "LINKUSDT": "LINKUSDT (Chainlink)",
-    "LTCUSDT": "LTCUSDT (Litecoin)"
+    "BTCUSDT": "BTCUSDT (Bitcoin)", "ETHUSDT": "ETHUSDT (Ethereum)",
+    "SOLUSDT": "SOLUSDT (Solana)", "BNBUSDT": "BNBUSDT (BNB)",
+    "XRPUSDT": "XRPUSDT (XRP)", "ADAUSDT": "ADAUSDT (Cardano)",
+    "DOGEUSDT": "DOGEUSDT (Dogecoin)", "AVAXUSDT": "AVAXUSDT (Avalanche)",
+    "LINKUSDT": "LINKUSDT (Chainlink)", "LTCUSDT": "LTCUSDT (Litecoin)"
 }
 
 TIMEFRAMES = {
-    "1 Minute (1m)": "1m",
-    "3 Minutes (3m)": "3m",
-    "5 Minutes (5m)": "5m",
-    "15 Minutes (15m)": "15m",
-    "30 Minutes (30m)": "30m",
-    "1 Hour (1h)": "1h"
+    "1 Minute (1m)": "1m", "3 Minutes (3m)": "3m", "5 Minutes (5m)": "5m",
+    "15 Minutes (15m)": "15m", "30 Minutes (30m)": "30m", "1 Hour (1h)": "1h"
 }
 
 # ============================================================
-# API REQUEST
+# API REQUEST FUNCTION
 # ============================================================
 
 def binance_request(endpoint, params):
-
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json"
-    }
-
+    headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
     for host in BINANCE_HOSTS:
-
         try:
-
-            response = requests.get(
-                host + endpoint,
-                params=params,
-                headers=headers,
-                timeout=7
-            )
-
+            response = requests.get(host + endpoint, params=params, headers=headers, timeout=7)
             if response.status_code == 200:
                 return response.json()
-
         except Exception:
             continue
-
     return None
-
-# ============================================================
-# LIVE PRICE
-# ============================================================
 
 @st.cache_data(ttl=1)
 def get_live_price(symbol):
-
-    data = binance_request(
-        "/api/v3/ticker/price",
-        {"symbol": symbol}
-    )
-
+    data = binance_request("/api/v3/ticker/price", {"symbol": symbol})
     if data and "price" in data:
         return float(data["price"])
-
     return None
-
-# ============================================================
-# 24H DATA
-# ============================================================
 
 @st.cache_data(ttl=2)
 def get_24h(symbol):
-
-    data = binance_request(
-        "/api/v3/ticker/24hr",
-        {"symbol": symbol}
-    )
-
+    data = binance_request("/api/v3/ticker/24hr", {"symbol": symbol})
     if data:
-
-        return (
-            float(data.get("priceChange", 0)),
-            float(data.get("priceChangePercent", 0))
-        )
-
+        return float(data.get("priceChange", 0)), float(data.get("priceChangePercent", 0))
     return 0.0, 0.0
-
-# ============================================================
-# CANDLES
-# ============================================================
 
 @st.cache_data(ttl=2)
 def get_candles(symbol, interval):
-
-    data = binance_request(
-        "/api/v3/klines",
-        {
-            "symbol": symbol,
-            "interval": interval,
-            "limit": 200
-        }
-    )
-
+    data = binance_request("/api/v3/klines", {"symbol": symbol, "interval": interval, "limit": 200})
     if not data:
         return pd.DataFrame()
-
     rows = []
-
     for c in data:
-
         rows.append({
-            "time": int(c[0]),
-            "open": float(c[1]),
-            "high": float(c[2]),
-            "low": float(c[3]),
-            "close": float(c[4]),
-            "volume": float(c[5])
+            "time": int(c[0]), "open": float(c[1]), "high": float(c[2]),
+            "low": float(c[3]), "close": float(c[4]), "volume": float(c[5])
         })
-
     return pd.DataFrame(rows)
 
 # ============================================================
@@ -507,760 +273,198 @@ def get_candles(symbol, interval):
 # ============================================================
 
 def analyze_market(df):
-
     if df.empty or len(df) < 50:
         return None
-
     x = df.copy()
+    x["RSI"] = RSIIndicator(close=x["close"], window=14).rsi()
+    x["EMA9"] = EMAIndicator(close=x["close"], window=9).ema_indicator()
+    x["EMA21"] = EMAIndicator(close=x["close"], window=21).ema_indicator()
+    x["ATR"] = AverageTrueRange(high=x["high"], low=x["low"], close=x["close"], window=14).average_true_range()
 
-    x["RSI"] = RSIIndicator(
-        close=x["close"],
-        window=14
-    ).rsi()
-
-    x["EMA9"] = EMAIndicator(
-        close=x["close"],
-        window=9
-    ).ema_indicator()
-
-    x["EMA21"] = EMAIndicator(
-        close=x["close"],
-        window=21
-    ).ema_indicator()
-
-    x["ATR"] = AverageTrueRange(
-        high=x["high"],
-        low=x["low"],
-        close=x["close"],
-        window=14
-    ).average_true_range()
-
-    # CLOSED CANDLE
-    i = -2
-    p = -3
-
+    i, p = -2, -3
     price = float(x["close"].iloc[i])
     rsi = float(x["RSI"].iloc[i])
-
     ema9 = float(x["EMA9"].iloc[i])
     ema21 = float(x["EMA21"].iloc[i])
-
     prev9 = float(x["EMA9"].iloc[p])
     prev21 = float(x["EMA21"].iloc[p])
-
     atr = float(x["ATR"].iloc[i])
 
-    call_score = 0
-    put_score = 0
-
+    call_score, put_score = 0, 0
     reasons = []
 
-    # EMA TREND
     if ema9 > ema21:
-
         call_score += 30
         reasons.append("EMA 9 is above EMA 21")
-
     elif ema9 < ema21:
-
         put_score += 30
         reasons.append("EMA 9 is below EMA 21")
 
-    # EMA CROSS
     if prev9 <= prev21 and ema9 > ema21:
-
         call_score += 30
         reasons.append("Bullish EMA crossover")
-
     elif prev9 >= prev21 and ema9 < ema21:
-
         put_score += 30
         reasons.append("Bearish EMA crossover")
 
-    # RSI
     if rsi < 35:
-
         call_score += 20
         reasons.append("RSI is in oversold zone")
-
     elif rsi > 65:
-
         put_score += 20
         reasons.append("RSI is in overbought zone")
 
-    # CANDLE
-    candle_open = float(x["open"].iloc[i])
-    candle_close = float(x["close"].iloc[i])
-
-    if candle_close > candle_open:
-
+    if x["close"].iloc[i] > x["open"].iloc[i]:
         call_score += 10
-
-    elif candle_close < candle_open:
-
+    elif x["close"].iloc[i] < x["open"].iloc[i]:
         put_score += 10
 
-    # SIGNAL
     if call_score >= 60 and call_score > put_score:
-
-        signal = "CALL"
-        confidence = min(call_score, 95)
-
+        signal, confidence = "CALL", min(call_score, 95)
     elif put_score >= 60 and put_score > call_score:
-
-        signal = "PUT"
-        confidence = min(put_score, 95)
-
+        signal, confidence = "PUT", min(put_score, 95)
     else:
+        signal, confidence = "NO SIGNAL", max(call_score, put_score)
 
-        signal = "NO SIGNAL"
-        confidence = max(call_score, put_score)
-
-    # TREND
-    if ema9 > ema21:
-        trend = "BULLISH"
-
-    elif ema9 < ema21:
-        trend = "BEARISH"
-
-    else:
-        trend = "NEUTRAL"
+    trend = "BULLISH" if ema9 > ema21 else ("BEARISH" if ema9 < ema21 else "NEUTRAL")
 
     return {
-        "signal": signal,
-        "confidence": confidence,
-        "price": price,
-        "rsi": rsi,
-        "ema9": ema9,
-        "ema21": ema21,
-        "atr": atr,
-        "trend": trend,
-        "reasons": reasons
+        "signal": signal, "confidence": confidence, "price": price,
+        "rsi": rsi, "ema9": ema9, "ema21": ema21, "atr": atr,
+        "trend": trend, "reasons": reasons
     }
 
 # ============================================================
-# LOGO
+# LOGO HANDLING
 # ============================================================
 
 logo_path = "jutt_bot_logo.png"
-
 if os.path.exists(logo_path):
-
     with open(logo_path, "rb") as f:
-
-        logo_b64 = base64.b64encode(
-            f.read()
-        ).decode()
-
-    logo_html = f"""
-    <img src="data:image/png;base64,{logo_b64}">
-    """
-
+        logo_b64 = base64.b64encode(f.read()).decode()
+    logo_html = f'<img src="data:image/png;base64,{logo_b64}">'
 else:
-
-    logo_html = """
-    <div style="
-        color:#ffd338;
-        font-size:60px;
-        font-weight:900;
-    ">
-        ⭐
-    </div>
-    """
+    logo_html = '<div style="color:#ffd338;font-size:60px;font-weight:900;">⭐</div>'
 
 # ============================================================
-# HEADER
+# HEADER & LAYOUT
 # ============================================================
 
 clock = datetime.now().strftime("%I:%M:%S %p")
 
 html(f"""
 <div class="hero">
-
     <div class="hero-grid">
-
-        <div class="logo-box">
-            {logo_html}
-        </div>
-
+        <div class="logo-box">{logo_html}</div>
         <div class="brand-area">
-
-            <div class="brand-main">
-                JUTT BOT
-            </div>
-
-            <div class="brand-pro">
-                PRO TRADER
-            </div>
-
-            <div class="brand-tag">
-                ANALYZE | SIGNAL | TRADE | GROW
-            </div>
-
-            <div class="brand-sub">
-                DISCIPLINE TODAY • BIGGER TOMORROW
-            </div>
-
+            <div class="brand-main">JUTT BOT</div>
+            <div class="brand-pro">PRO TRADER</div>
+            <div class="brand-tag">ANALYZE | SIGNAL | TRADE | GROW</div>
+            <div class="brand-sub">DISCIPLINE TODAY • BIGGER TOMORROW</div>
         </div>
-
         <div class="live-card">
-
-            <div class="live-title">
-                <span class="live-dot">●</span>
-                LIVE MARKET
-            </div>
-
-            <div class="live-time">
-                {clock}
-            </div>
-
+            <div class="live-title"><span class="live-dot">●</span> LIVE MARKET</div>
+            <div class="live-time">{clock}</div>
         </div>
-
     </div>
-
 </div>
 """)
 
-# ============================================================
-# CONTROLS
-# ============================================================
-
 html('<div class="panel">')
-
 c1, c2 = st.columns(2)
-
 with c1:
-
-    pair = st.selectbox(
-        "📊 Pair / Asset",
-        PAIRS,
-        format_func=lambda x: PAIR_NAMES[x]
-    )
-
+    pair = st.selectbox("📊 Pair / Asset", PAIRS, format_func=lambda x: PAIR_NAMES[x])
 with c2:
-
-    timeframe_name = st.selectbox(
-        "⏳ Timeframe",
-        list(TIMEFRAMES.keys())
-    )
+    timeframe_name = st.selectbox("⏳ Timeframe", list(TIMEFRAMES.keys()))
 
 timeframe = TIMEFRAMES[timeframe_name]
-
-generate = st.button(
-    "⚡ GENERATE AI SIGNAL",
-    use_container_width=True
-)
-
+generate = st.button("⚡ GENERATE AI SIGNAL", use_container_width=True)
 html('</div>')
 
-# ============================================================
-# GET LIVE DATA
-# ============================================================
-
 live_price = get_live_price(pair)
-
 change, change_percent = get_24h(pair)
-
-df = get_candles(
-    pair,
-    timeframe
-)
-
+df = get_candles(pair, timeframe)
 analysis = analyze_market(df)
 
-# ============================================================
-# METRICS
-# ============================================================
-
-if analysis:
-
-    rsi = analysis["rsi"]
-    trend = analysis["trend"]
-
-else:
-
-    rsi = 0
-    trend = "OFFLINE"
-
-connected = (
-    live_price is not None
-    and not df.empty
-)
+rsi = analysis["rsi"] if analysis else 0
+trend = analysis["trend"] if analysis else "OFFLINE"
+connected = live_price is not None and not df.empty
 
 m1, m2, m3, m4 = st.columns(4)
 
-# LIVE FEED
-
 with m1:
-
     status = "CONNECTED" if connected else "OFFLINE"
     cls = "green" if connected else "red"
-
-    html(f"""
-    <div class="metric-card">
-
-        <div class="metric-title">
-            LIVE FEED
-        </div>
-
-        <div class="metric-value {cls}">
-            ● {status}
-        </div>
-
-    </div>
-    """)
-
-# LIVE PRICE
+    html(f'<div class="metric-card"><div class="metric-title">LIVE FEED</div><div class="metric-value {cls}">● {status}</div></div>')
 
 with m2:
-
-    price_text = (
-        f"${live_price:,.2f}"
-        if live_price is not None
-        else "--"
-    )
-
-    change_cls = (
-        "green"
-        if change_percent >= 0
-        else "red"
-    )
-
-    html(f"""
-    <div class="metric-card">
-
-        <div class="metric-title">
-            LIVE PRICE
-        </div>
-
-        <div class="metric-value">
-            {price_text}
-        </div>
-
-        <div class="{change_cls}">
-            {change:+,.2f} ({change_percent:+.2f}%)
-        </div>
-
-    </div>
-    """)
-
-# RSI
+    price_text = f"${live_price:,.2f}" if live_price is not None else "--"
+    change_cls = "green" if change_percent >= 0 else "red"
+    html(f'<div class="metric-card"><div class="metric-title">LIVE PRICE</div><div class="metric-value">{price_text}</div><div class="{change_cls}">{change:+,.2f} ({change_percent:+.2f}%)</div></div>')
 
 with m3:
-
-    html(f"""
-    <div class="metric-card">
-
-        <div class="metric-title">
-            RSI (14)
-        </div>
-
-        <div class="metric-value">
-            {rsi:.2f}
-        </div>
-
-    </div>
-    """)
-
-# TREND
+    html(f'<div class="metric-card"><div class="metric-title">RSI (14)</div><div class="metric-value">{rsi:.2f}</div></div>')
 
 with m4:
-
-    if trend == "BULLISH":
-
-        trend_html = '<span class="green">BULLISH 🟢</span>'
-
-    elif trend == "BEARISH":
-
-        trend_html = '<span class="red">BEARISH 🔴</span>'
-
-    else:
-
-        trend_html = '<span class="yellow">NEUTRAL 🟡</span>'
-
-    html(f"""
-    <div class="metric-card">
-
-        <div class="metric-title">
-            TREND
-        </div>
-
-        <div class="metric-value">
-            {trend_html}
-        </div>
-
-    </div>
-    """)
-
-# ============================================================
-# GENERATE SIGNAL
-# ============================================================
+    trend_html = '<span class="green">BULLISH 🟢</span>' if trend == "BULLISH" else ('<span class="red">BEARISH 🔴</span>' if trend == "BEARISH" else '<span class="yellow">NEUTRAL 🟡</span>')
+    html(f'<div class="metric-card"><div class="metric-title">TREND</div><div class="metric-value">{trend_html}</div></div>')
 
 if generate:
-
     if analysis:
-
         st.session_state["signal_data"] = analysis
         st.session_state["signal_pair"] = pair
         st.session_state["signal_tf"] = timeframe
-
     else:
+        st.error("Binance live market data is unavailable.")
 
-        st.error(
-            "Binance live market data is unavailable."
-        )
-
-signal_data = st.session_state.get(
-    "signal_data"
-)
+signal_data = st.session_state.get("signal_data")
+if signal_data and (st.session_state.get("signal_pair") != pair or st.session_state.get("signal_tf") != timeframe):
+    signal_data = None
 
 if signal_data:
-
-    if (
-        st.session_state.get("signal_pair") != pair
-        or
-        st.session_state.get("signal_tf") != timeframe
-    ):
-
-        signal_data = None
-
-# ============================================================
-# SIGNAL
-# ============================================================
-
-if signal_data:
-
     signal = signal_data["signal"]
-
-    entry = (
-        live_price
-        if live_price is not None
-        else signal_data["price"]
-    )
-
+    entry = live_price if live_price is not None else signal_data["price"]
     confidence = signal_data["confidence"]
-
     atr = signal_data["atr"]
 
     if signal == "CALL":
-
-        sl = entry - (1.5 * atr)
-        tp = entry + (2.5 * atr)
-
-        html(f"""
-        <div class="signal-call">
-
-            <div class="signal-title">
-                ▲ CALL ▲ [ {pair} — UP / HIGHER ]
-            </div>
-
-            <div class="signal-sub">
-                Technical Signal Strength: {confidence}%
-                | Timeframe: {timeframe_name}
-            </div>
-
-        </div>
-        """)
-
+        sl, tp = entry - (1.5 * atr), entry + (2.5 * atr)
+        html(f'<div class="signal-call"><div class="signal-title">▲ CALL ▲ [ {pair} — UP / HIGHER ]</div><div class="signal-sub">Technical Signal Strength: {confidence}% | Timeframe: {timeframe_name}</div></div>')
         a, b, c = st.columns(3)
-
-        with a:
-            st.metric(
-                "ENTRY",
-                f"{entry:,.2f}"
-            )
-
-        with b:
-            st.metric(
-                "STOP LOSS",
-                f"{sl:,.2f}"
-            )
-
-        with c:
-            st.metric(
-                "TAKE PROFIT",
-                f"{tp:,.2f}"
-            )
-
+        a.metric("ENTRY", f"{entry:,.2f}")
+        b.metric("STOP LOSS", f"{sl:,.2f}")
+        c.metric("TAKE PROFIT", f"{tp:,.2f}")
     elif signal == "PUT":
-
-        sl = entry + (1.5 * atr)
-        tp = entry - (2.5 * atr)
-
-        html(f"""
-        <div class="signal-put">
-
-            <div class="signal-title">
-                ▼ PUT ▼ [ {pair} — DOWN / LOWER ]
-            </div>
-
-            <div class="signal-sub">
-                Technical Signal Strength: {confidence}%
-                | Timeframe: {timeframe_name}
-            </div>
-
-        </div>
-        """)
-
+        sl, tp = entry + (1.5 * atr), entry - (2.5 * atr)
+        html(f'<div class="signal-put"><div class="signal-title">▼ PUT ▼ [ {pair} — DOWN / LOWER ]</div><div class="signal-sub">Technical Signal Strength: {confidence}% | Timeframe: {timeframe_name}</div></div>')
         a, b, c = st.columns(3)
-
-        with a:
-            st.metric(
-                "ENTRY",
-                f"{entry:,.2f}"
-            )
-
-        with b:
-            st.metric(
-                "STOP LOSS",
-                f"{sl:,.2f}"
-            )
-
-        with c:
-            st.metric(
-                "TAKE PROFIT",
-                f"{tp:,.2f}"
-            )
-
+        a.metric("ENTRY", f"{entry:,.2f}")
+        b.metric("STOP LOSS", f"{sl:,.2f}")
+        c.metric("TAKE PROFIT", f"{tp:,.2f}")
     else:
-
-        html(f"""
-        <div class="signal-neutral">
-
-            <div class="signal-title">
-                ⏳ NO CLEAR SETUP — WAIT
-            </div>
-
-            <div class="signal-sub">
-                {pair} • {timeframe_name}
-            </div>
-
-        </div>
-        """)
-
+        html(f'<div class="signal-neutral"><div class="signal-title">⏳ NO CLEAR SETUP — WAIT</div><div class="signal-sub">{pair} • {timeframe_name}</div></div>')
 else:
-
-    html(f"""
-    <div class="signal-neutral">
-
-        <div class="signal-title">
-            ⚡ GENERATE AI SIGNAL
-        </div>
-
-        <div class="signal-sub">
-            {pair} • {timeframe_name} • Binance Live Market
-        </div>
-
-    </div>
-    """)
+    html(f'<div class="signal-neutral"><div class="signal-title">⚡ GENERATE AI SIGNAL</div><div class="signal-sub">{pair} • {timeframe_name} • Binance Live Market</div></div>')
 
 # ============================================================
-# LIVE CHART
+# RECENT SIGNALS & FOOTER
 # ============================================================
-
-if not df.empty:
-
-    chart_df = df.tail(80).copy()
-
-    candle_data = []
-    volume_data = []
-
-    for _, row in chart_df.iterrows():
-
-        candle_data.append({
-            "time": int(row["time"] / 1000),
-            "open": float(row["open"]),
-            "high": float(row["high"]),
-            "low": float(row["low"]),
-            "close": float(row["close"])
-        })
-
-        volume_data.append({
-            "time": int(row["time"] / 1000),
-            "value": float(row["volume"]),
-            "color":
-                "#16c784"
-                if row["close"] >= row["open"]
-                else "#ef4056"
-        })
-
-    candle_json = json.dumps(candle_data)
-    volume_json = json.dumps(volume_data)
-
-    chart_html = f"""
-    <div class="chart-panel">
-
-        <div class="chart-heading">
-            ₿ {pair} • {timeframe_name} • Binance Live Market
-        </div>
-
-        <div id="chart"
-             style="width:100%;height:455px;">
-        </div>
-
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.min.js"></script>
-
-    <script>
-
-    const candleData = {candle_json};
-    const volumeData = {volume_json};
-
-    const container = document.getElementById("chart");
-
-    const chart = LightweightCharts.createChart(
-        container,
-        {{
-            width: container.clientWidth,
-            height: 445,
-
-            layout: {{
-                background: {{ color: "#080d12" }},
-                textColor: "#aab4bf"
-            }},
-
-            grid: {{
-                vertLines: {{ color: "#182128" }},
-                horzLines: {{ color: "#182128" }}
-            }},
-
-            rightPriceScale: {{
-                borderColor: "#34414b"
-            }},
-
-            timeScale: {{
-                borderColor: "#34414b",
-                timeVisible: true,
-                secondsVisible: false
-            }}
-        }}
-    );
-
-    const candles = chart.addCandlestickSeries({{
-        upColor: "#16c784",
-        downColor: "#ef4056",
-        borderUpColor: "#16c784",
-        borderDownColor: "#ef4056",
-        wickUpColor: "#16c784",
-        wickDownColor: "#ef4056"
-    }});
-
-    candles.setData(candleData);
-
-    const volume = chart.addHistogramSeries({{
-        priceFormat: {{
-            type: "volume"
-        }},
-        priceScaleId: ""
-    }});
-
-    volume.priceScale().applyOptions({{
-        scaleMargins: {{
-            top: 0.78,
-            bottom: 0
-        }}
-    }});
-
-    volume.setData(volumeData);
-
-    chart.timeScale().fitContent();
-
-    window.addEventListener("resize", function() {{
-        chart.applyOptions({{
-            width: container.clientWidth
-        }});
-    }});
-
-    </script>
-    """
-
-    st.components.v1.html(
-        chart_html,
-        height=475,
-        scrolling=False
-    )
-
-# ============================================================
-# RECENT SIGNALS
-# ============================================================
-
-html("""
-<div class="panel">
-    <div class="recent-title">
-        📋 RECENT SIGNALS
-    </div>
-</div>
-""")
-
 if "recent_signals" not in st.session_state:
-
     st.session_state.recent_signals = []
 
 if generate and signal_data:
-
     new_signal = {
-        "TIME": datetime.now().strftime("%H:%M:%S"),
-        "PAIR": pair,
-        "SIGNAL": signal_data["signal"],
-        "PRICE": signal_data["price"],
+        "TIME": datetime.now().strftime("%H:%M:%S"), "PAIR": pair,
+        "SIGNAL": signal_data["signal"], "PRICE": signal_data["price"],
         "STRENGTH": f"{signal_data['confidence']}%"
     }
+    st.session_state.recent_signals.insert(0, new_signal)
+    st.session_state.recent_signals = st.session_state.recent_signals[:10]
 
-    st.session_state.recent_signals.insert(
-        0,
-        new_signal
-    )
-
-    st.session_state.recent_signals = \
-        st.session_state.recent_signals[:10]
-
+html('<div class="panel"><div class="recent-title">📋 RECENT SIGNALS</div></div>')
 if st.session_state.recent_signals:
-
-    recent_df = pd.DataFrame(
-        st.session_state.recent_signals
-    )
-
-    st.dataframe(
-        recent_df,
-        use_container_width=True,
-        hide_index=True
-    )
-
+    st.dataframe(pd.DataFrame(st.session_state.recent_signals), use_container_width=True, hide_index=True)
 else:
-
     st.info("No signals generated yet.")
 
-# ============================================================
-# TECHNICAL ANALYSIS
-# ============================================================
-
-if analysis:
-
-    html("""
-    <div class="panel">
-        <div class="recent-title">
-            🧠 JUTT BOT TECHNICAL ANALYSIS
-        </div>
-    </div>
-    """)
-
-    for reason in analysis["reasons"]:
-
-        st.write("•", reason)
-
-    st.write(
-        f"EMA 9: `{analysis['ema9']:.6f}`  |  "
-        f"EMA 21: `{analysis['ema21']:.6f}`  |  "
-        f"ATR: `{analysis['atr']:.6f}`"
-    )
-
-# ============================================================
-# FOOTER
-# ============================================================
-
-html("""
-<div class="footer">
-    JUTT BOT PRO • ANALYZE | SIGNAL | TRADE | GROW
-</div>
-""")
+html('<div class="footer">JUTT BOT PRO • ANALYZE | SIGNAL | TRADE | GROW</div>'
