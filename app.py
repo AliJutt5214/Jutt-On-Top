@@ -4,13 +4,14 @@ import requests
 import json
 import os
 import base64
+import textwrap
 from datetime import datetime
 from ta.momentum import RSIIndicator
 from ta.trend import EMAIndicator
 from ta.volatility import AverageTrueRange
 
 # ============================================================
-# PAGE
+# PAGE CONFIG
 # ============================================================
 
 st.set_page_config(
@@ -21,7 +22,340 @@ st.set_page_config(
 )
 
 # ============================================================
-# CONFIG
+# HTML RENDER FIX
+# ============================================================
+
+def html(content):
+    st.markdown(
+        textwrap.dedent(content).strip(),
+        unsafe_allow_html=True
+    )
+
+# ============================================================
+# CSS
+# ============================================================
+
+html("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Poppins', sans-serif !important;
+}
+
+.stApp {
+    background:
+        radial-gradient(circle at 50% -10%, #17251c 0%, #080d11 38%, #040608 80%);
+    color: #ffffff !important;
+}
+
+header,
+footer,
+#MainMenu,
+[data-testid="stToolbar"],
+[data-testid="stStatusWidget"],
+[data-testid="stDecoration"],
+[data-testid="stHeader"],
+[data-testid="stBottom"],
+[data-testid="stDeployButton"],
+[data-testid="stAppDeployButton"],
+.viewerBadge_container__1QSob,
+[class*="viewerBadge"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+.block-container {
+    max-width: 1450px !important;
+    padding-top: 12px !important;
+    padding-bottom: 20px !important;
+}
+
+/* ================= HERO ================= */
+
+.hero {
+    background:
+        radial-gradient(circle at 50% 40%, rgba(255,193,7,.14), transparent 38%),
+        linear-gradient(125deg, #05080b, #10171b, #06090c);
+
+    border: 2px solid #d6aa2c;
+    border-radius: 22px;
+    padding: 20px;
+    margin-bottom: 15px;
+
+    box-shadow:
+        0 0 35px rgba(255,193,7,.12),
+        inset 0 0 35px rgba(255,193,7,.025);
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr 180px;
+    gap: 20px;
+    align-items: center;
+    min-height: 190px;
+}
+
+.logo-box {
+    width: 205px;
+    height: 175px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+}
+
+.logo-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 18px;
+}
+
+.brand-area {
+    text-align: center;
+}
+
+.brand-main {
+    color: #ffd338;
+    font-size: 52px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    line-height: 1;
+}
+
+.brand-pro {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 7px;
+    margin-top: 8px;
+}
+
+.brand-tag {
+    color: #ffd02f;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    margin-top: 13px;
+}
+
+.brand-sub {
+    color: #9ba7b2;
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin-top: 9px;
+}
+
+.live-card {
+    background: #10171c;
+    border: 1px solid #394650;
+    border-radius: 16px;
+    padding: 17px;
+    text-align: center;
+}
+
+.live-title {
+    color: #a9b2bc;
+    font-size: 13px;
+}
+
+.live-dot {
+    color: #19e86c;
+    font-size: 18px;
+}
+
+.live-time {
+    color: #ffd02f;
+    font-size: 19px;
+    font-weight: 900;
+    margin-top: 7px;
+}
+
+/* ================= PANEL ================= */
+
+.panel {
+    background: linear-gradient(145deg, #10171d, #090e13);
+    border: 1px solid #303c47;
+    border-radius: 17px;
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+/* ================= SELECT ================= */
+
+div[data-baseweb="select"] > div {
+    background: #10171d !important;
+    border: 1px solid #34414c !important;
+    border-radius: 12px !important;
+}
+
+div[data-baseweb="select"] span {
+    color: #ffffff !important;
+}
+
+label {
+    color: #aab4bf !important;
+}
+
+/* ================= BUTTON ================= */
+
+div.stButton > button {
+    height: 58px;
+
+    background: linear-gradient(135deg, #f2ba1d, #ffd33d);
+
+    border: 1px solid #ffe47d;
+    border-radius: 15px;
+
+    color: #090909 !important;
+
+    font-size: 20px;
+    font-weight: 900;
+
+    box-shadow: 0 0 25px rgba(255,193,7,.15);
+}
+
+/* ================= METRICS ================= */
+
+.metric-card {
+    background: linear-gradient(145deg, #11191f, #0b1015);
+    border: 1px solid #303c47;
+    border-radius: 16px;
+    min-height: 108px;
+    padding: 15px 8px;
+    text-align: center;
+}
+
+.metric-title {
+    color: #8f9aa5;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.metric-value {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 900;
+    margin-top: 8px;
+}
+
+.green {
+    color: #20e875 !important;
+}
+
+.red {
+    color: #ff5261 !important;
+}
+
+.yellow {
+    color: #ffd02f !important;
+}
+
+/* ================= SIGNAL ================= */
+
+.signal-call {
+    background: linear-gradient(135deg, #087d38, #20b953);
+    border: 2px solid #29f66e;
+    border-radius: 18px;
+    padding: 19px;
+    text-align: center;
+    margin: 15px 0;
+}
+
+.signal-put {
+    background: linear-gradient(135deg, #981727, #dc3043);
+    border: 2px solid #ff5969;
+    border-radius: 18px;
+    padding: 19px;
+    text-align: center;
+    margin: 15px 0;
+}
+
+.signal-neutral {
+    background: linear-gradient(135deg, #242b31, #12181d);
+    border: 1px solid #56616b;
+    border-radius: 18px;
+    padding: 19px;
+    text-align: center;
+    margin: 15px 0;
+}
+
+.signal-title {
+    color: #ffffff;
+    font-size: 27px;
+    font-weight: 900;
+}
+
+.signal-sub {
+    color: #ffffff;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+/* ================= CHART ================= */
+
+.chart-panel {
+    background: #080d12;
+    border: 1px solid #2d3943;
+    border-radius: 17px;
+    padding: 10px;
+    margin-bottom: 14px;
+}
+
+.chart-heading {
+    color: #dce3e8;
+    font-size: 15px;
+    font-weight: 800;
+    padding: 8px;
+}
+
+/* ================= FOOTER ================= */
+
+.footer {
+    text-align: center;
+    color: #65717c;
+    font-size: 10px;
+    letter-spacing: 3px;
+    padding: 18px;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:900px) {
+
+    .hero-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .logo-box {
+        width: 170px;
+        height: 140px;
+    }
+
+    .brand-main {
+        font-size: 40px;
+    }
+
+    .brand-pro {
+        font-size: 17px;
+    }
+
+    .brand-tag {
+        font-size: 10px;
+    }
+
+    .live-card {
+        width: 180px;
+        margin: auto;
+    }
+}
+</style>
+""")
+
+# ============================================================
+# BINANCE
 # ============================================================
 
 BINANCE_HOSTS = [
@@ -67,453 +401,7 @@ TIMEFRAMES = {
 }
 
 # ============================================================
-# CSS
-# ============================================================
-
-st.markdown("""
-<style>
-
-@import url(
-'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap'
-);
-
-html, body, [class*="css"] {
-    font-family: 'Poppins', sans-serif !important;
-}
-
-.stApp {
-    background:
-    radial-gradient(
-        circle at 50% -15%,
-        #1d2920 0%,
-        #0a0f13 38%,
-        #05070a 78%
-    );
-    color:#fff !important;
-}
-
-/* REMOVE STREAMLIT UI */
-
-header,
-footer,
-#MainMenu,
-[data-testid="stToolbar"],
-[data-testid="stStatusWidget"],
-[data-testid="stDecoration"],
-[data-testid="stHeader"],
-[data-testid="stBottom"],
-[data-testid="stBottomBlockContainer"],
-[data-testid="stDeployButton"],
-[data-testid="stAppDeployButton"],
-.viewerBadge_container__1QSob,
-[class*="viewerBadge"],
-[class*="stFloating"],
-[class*="stChatFloating"],
-[class*="stActionButton"] {
-    display:none !important;
-    visibility:hidden !important;
-    opacity:0 !important;
-    pointer-events:none !important;
-}
-
-.block-container {
-    max-width: 1450px !important;
-    padding-top: 12px !important;
-    padding-bottom: 20px !important;
-}
-
-/* ============================================================
-HEADER
-============================================================ */
-
-.hero {
-    position:relative;
-    overflow:hidden;
-
-    min-height:220px;
-
-    background:
-    radial-gradient(
-        circle at 52% 45%,
-        rgba(255,200,40,.15),
-        transparent 34%
-    ),
-    linear-gradient(
-        120deg,
-        #05080b,
-        #10171a,
-        #080c0f
-    );
-
-    border:2px solid #d6aa2c;
-    border-radius:22px;
-
-    padding:22px;
-
-    margin-bottom:14px;
-
-    box-shadow:
-    0 0 35px rgba(255,193,7,.13),
-    inset 0 0 40px rgba(255,193,7,.025);
-}
-
-.hero-grid {
-    display:grid;
-    grid-template-columns:240px 1fr 180px;
-    gap:20px;
-    align-items:center;
-    min-height:175px;
-}
-
-/* LOGO */
-
-.logo-box {
-    width:210px;
-    height:175px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-.logo-box img {
-    width:100%;
-    height:100%;
-    object-fit:contain;
-    border-radius:20px;
-}
-
-/* BRAND */
-
-.brand-area {
-    text-align:center;
-}
-
-.brand-main {
-    color:#ffd338;
-    font-size:55px;
-    font-weight:900;
-    letter-spacing:3px;
-    line-height:1;
-    text-shadow:0 0 18px rgba(255,193,7,.20);
-}
-
-.brand-pro {
-    color:#ffffff;
-    font-size:23px;
-    font-weight:800;
-    letter-spacing:7px;
-    margin-top:8px;
-}
-
-.brand-tag {
-    color:#ffd02f;
-    font-size:15px;
-    font-weight:800;
-    letter-spacing:4px;
-    margin-top:13px;
-}
-
-.brand-sub {
-    color:#9faab5;
-    font-size:11px;
-    letter-spacing:3px;
-    margin-top:10px;
-}
-
-/* LIVE */
-
-.live-card {
-    background:#10171c;
-    border:1px solid #394650;
-    border-radius:16px;
-    padding:17px;
-    text-align:center;
-}
-
-.live-title {
-    color:#a9b2bc;
-    font-size:13px;
-}
-
-.live-dot {
-    color:#16e96d;
-    font-size:20px;
-}
-
-.live-time {
-    color:#ffd02f;
-    font-size:20px;
-    font-weight:900;
-    margin-top:7px;
-}
-
-/* ============================================================
-PANELS
-============================================================ */
-
-.panel {
-    background:
-    linear-gradient(
-        145deg,
-        #10171d,
-        #090e13
-    );
-
-    border:1px solid #303b45;
-    border-radius:17px;
-
-    padding:16px;
-
-    margin-bottom:14px;
-
-    box-shadow:
-    0 5px 20px rgba(0,0,0,.20);
-}
-
-/* ============================================================
-SELECT
-============================================================ */
-
-label {
-    color:#aab4bf !important;
-    font-weight:600 !important;
-}
-
-div[data-baseweb="select"] > div {
-    background:#10171d !important;
-    border:1px solid #34414c !important;
-    border-radius:12px !important;
-    color:#fff !important;
-}
-
-div[data-baseweb="select"] span {
-    color:#fff !important;
-}
-
-/* ============================================================
-BUTTON
-============================================================ */
-
-div.stButton > button {
-    height:58px;
-
-    background:
-    linear-gradient(
-        135deg,
-        #f2ba1d,
-        #ffd33d
-    );
-
-    border:1px solid #ffe47d;
-    border-radius:15px;
-
-    color:#090909 !important;
-
-    font-size:20px;
-    font-weight:900;
-
-    box-shadow:
-    0 0 25px rgba(255,193,7,.15);
-}
-
-/* ============================================================
-METRICS
-============================================================ */
-
-.metric-card {
-    background:
-    linear-gradient(
-        145deg,
-        #11191f,
-        #0b1015
-    );
-
-    border:1px solid #303c47;
-    border-radius:16px;
-
-    min-height:108px;
-
-    padding:15px 8px;
-
-    text-align:center;
-}
-
-.metric-title {
-    color:#8f9aa5;
-    font-size:12px;
-    letter-spacing:1px;
-}
-
-.metric-value {
-    color:#fff;
-    font-size:22px;
-    font-weight:900;
-    margin-top:8px;
-}
-
-.green {
-    color:#20e875 !important;
-}
-
-.red {
-    color:#ff5261 !important;
-}
-
-.yellow {
-    color:#ffd02f !important;
-}
-
-/* ============================================================
-SIGNAL
-============================================================ */
-
-.signal-call {
-    background:
-    linear-gradient(
-        135deg,
-        #087d38,
-        #20b953
-    );
-
-    border:2px solid #29f66e;
-
-    border-radius:18px;
-
-    padding:19px;
-
-    text-align:center;
-
-    margin:15px 0;
-
-    box-shadow:
-    0 0 25px rgba(20,220,90,.14);
-}
-
-.signal-put {
-    background:
-    linear-gradient(
-        135deg,
-        #981727,
-        #dc3043
-    );
-
-    border:2px solid #ff5969;
-
-    border-radius:18px;
-
-    padding:19px;
-
-    text-align:center;
-
-    margin:15px 0;
-}
-
-.signal-neutral {
-    background:
-    linear-gradient(
-        135deg,
-        #242b31,
-        #12181d
-    );
-
-    border:1px solid #56616b;
-
-    border-radius:18px;
-
-    padding:19px;
-
-    text-align:center;
-
-    margin:15px 0;
-}
-
-.signal-title {
-    color:#fff;
-    font-size:27px;
-    font-weight:900;
-}
-
-.signal-sub {
-    color:#fff;
-    font-size:14px;
-    margin-top:6px;
-}
-
-/* ============================================================
-CHART
-============================================================ */
-
-.chart-panel {
-    background:#080d12;
-    border:1px solid #2d3943;
-    border-radius:17px;
-    padding:10px;
-    margin-bottom:14px;
-}
-
-.chart-heading {
-    color:#dce3e8;
-    font-size:15px;
-    font-weight:800;
-    padding:8px;
-}
-
-/* ============================================================
-RECENT SIGNALS
-============================================================ */
-
-.recent-title {
-    color:#e5ebef;
-    font-size:16px;
-    font-weight:900;
-}
-
-.footer {
-    text-align:center;
-    color:#65717c;
-    font-size:10px;
-    letter-spacing:3px;
-    padding:18px;
-}
-
-/* MOBILE */
-
-@media(max-width:900px) {
-
-    .hero-grid {
-        grid-template-columns:1fr;
-        text-align:center;
-    }
-
-    .logo-box {
-        margin:auto;
-        width:170px;
-        height:140px;
-    }
-
-    .brand-main {
-        font-size:40px;
-    }
-
-    .brand-pro {
-        font-size:17px;
-    }
-
-    .brand-tag {
-        font-size:10px;
-    }
-
-    .live-card {
-        width:180px;
-        margin:auto;
-    }
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# ============================================================
-# BINANCE API
+# API REQUEST
 # ============================================================
 
 def binance_request(endpoint, params):
@@ -527,21 +415,20 @@ def binance_request(endpoint, params):
 
         try:
 
-            r = requests.get(
+            response = requests.get(
                 host + endpoint,
                 params=params,
                 headers=headers,
                 timeout=7
             )
 
-            if r.status_code == 200:
-                return r.json()
+            if response.status_code == 200:
+                return response.json()
 
         except Exception:
             continue
 
     return None
-
 
 # ============================================================
 # LIVE PRICE
@@ -552,7 +439,7 @@ def get_live_price(symbol):
 
     data = binance_request(
         "/api/v3/ticker/price",
-        {"symbol":symbol}
+        {"symbol": symbol}
     )
 
     if data and "price" in data:
@@ -560,9 +447,8 @@ def get_live_price(symbol):
 
     return None
 
-
 # ============================================================
-# 24H CHANGE
+# 24H DATA
 # ============================================================
 
 @st.cache_data(ttl=2)
@@ -570,18 +456,17 @@ def get_24h(symbol):
 
     data = binance_request(
         "/api/v3/ticker/24hr",
-        {"symbol":symbol}
+        {"symbol": symbol}
     )
 
     if data:
 
         return (
-            float(data.get("priceChange",0)),
-            float(data.get("priceChangePercent",0))
+            float(data.get("priceChange", 0)),
+            float(data.get("priceChangePercent", 0))
         )
 
-    return 0,0
-
+    return 0.0, 0.0
 
 # ============================================================
 # CANDLES
@@ -593,37 +478,29 @@ def get_candles(symbol, interval):
     data = binance_request(
         "/api/v3/klines",
         {
-            "symbol":symbol,
-            "interval":interval,
-            "limit":200
+            "symbol": symbol,
+            "interval": interval,
+            "limit": 200
         }
     )
 
     if not data:
         return pd.DataFrame()
 
-    rows=[]
+    rows = []
 
     for c in data:
 
         rows.append({
-
-            "time":int(c[0]),
-
-            "open":float(c[1]),
-
-            "high":float(c[2]),
-
-            "low":float(c[3]),
-
-            "close":float(c[4]),
-
-            "volume":float(c[5])
-
+            "time": int(c[0]),
+            "open": float(c[1]),
+            "high": float(c[2]),
+            "low": float(c[3]),
+            "close": float(c[4]),
+            "volume": float(c[5])
         })
 
     return pd.DataFrame(rows)
-
 
 # ============================================================
 # TECHNICAL ANALYSIS
@@ -631,177 +508,173 @@ def get_candles(symbol, interval):
 
 def analyze_market(df):
 
-    if df.empty or len(df)<50:
+    if df.empty or len(df) < 50:
         return None
 
-    x=df.copy()
+    x = df.copy()
 
-    x["RSI"]=RSIIndicator(
-        x["close"],
+    x["RSI"] = RSIIndicator(
+        close=x["close"],
         window=14
     ).rsi()
 
-    x["EMA9"]=EMAIndicator(
-        x["close"],
+    x["EMA9"] = EMAIndicator(
+        close=x["close"],
         window=9
     ).ema_indicator()
 
-    x["EMA21"]=EMAIndicator(
-        x["close"],
+    x["EMA21"] = EMAIndicator(
+        close=x["close"],
         window=21
     ).ema_indicator()
 
-    x["ATR"]=AverageTrueRange(
-        x["high"],
-        x["low"],
-        x["close"],
+    x["ATR"] = AverageTrueRange(
+        high=x["high"],
+        low=x["low"],
+        close=x["close"],
         window=14
     ).average_true_range()
 
     # CLOSED CANDLE
-    i=-2
-    p=-3
+    i = -2
+    p = -3
 
-    price=float(x["close"].iloc[i])
-    rsi=float(x["RSI"].iloc[i])
+    price = float(x["close"].iloc[i])
+    rsi = float(x["RSI"].iloc[i])
 
-    ema9=float(x["EMA9"].iloc[i])
-    ema21=float(x["EMA21"].iloc[i])
+    ema9 = float(x["EMA9"].iloc[i])
+    ema21 = float(x["EMA21"].iloc[i])
 
-    prev9=float(x["EMA9"].iloc[p])
-    prev21=float(x["EMA21"].iloc[p])
+    prev9 = float(x["EMA9"].iloc[p])
+    prev21 = float(x["EMA21"].iloc[p])
 
-    atr=float(x["ATR"].iloc[i])
+    atr = float(x["ATR"].iloc[i])
 
-    call_score=0
-    put_score=0
+    call_score = 0
+    put_score = 0
 
-    reasons=[]
+    reasons = []
 
-    # EMA
-    if ema9>ema21:
+    # EMA TREND
+    if ema9 > ema21:
 
-        call_score+=30
+        call_score += 30
         reasons.append("EMA 9 is above EMA 21")
 
-    elif ema9<ema21:
+    elif ema9 < ema21:
 
-        put_score+=30
+        put_score += 30
         reasons.append("EMA 9 is below EMA 21")
 
-    # CROSS
-    if prev9<=prev21 and ema9>ema21:
+    # EMA CROSS
+    if prev9 <= prev21 and ema9 > ema21:
 
-        call_score+=30
+        call_score += 30
         reasons.append("Bullish EMA crossover")
 
-    if prev9>=prev21 and ema9<ema21:
+    elif prev9 >= prev21 and ema9 < ema21:
 
-        put_score+=30
+        put_score += 30
         reasons.append("Bearish EMA crossover")
 
     # RSI
-    if rsi<35:
+    if rsi < 35:
 
-        call_score+=20
+        call_score += 20
         reasons.append("RSI is in oversold zone")
 
-    elif rsi>65:
+    elif rsi > 65:
 
-        put_score+=20
+        put_score += 20
         reasons.append("RSI is in overbought zone")
 
-    # CANDLE MOMENTUM
-    candle_open=float(x["open"].iloc[i])
-    candle_close=float(x["close"].iloc[i])
+    # CANDLE
+    candle_open = float(x["open"].iloc[i])
+    candle_close = float(x["close"].iloc[i])
 
-    if candle_close>candle_open:
+    if candle_close > candle_open:
 
-        call_score+=10
+        call_score += 10
 
-    elif candle_close<candle_open:
+    elif candle_close < candle_open:
 
-        put_score+=10
+        put_score += 10
 
     # SIGNAL
-    if call_score>=60 and call_score>put_score:
+    if call_score >= 60 and call_score > put_score:
 
-        signal="CALL"
-        confidence=min(call_score,95)
+        signal = "CALL"
+        confidence = min(call_score, 95)
 
-    elif put_score>=60 and put_score>call_score:
+    elif put_score >= 60 and put_score > call_score:
 
-        signal="PUT"
-        confidence=min(put_score,95)
+        signal = "PUT"
+        confidence = min(put_score, 95)
 
     else:
 
-        signal="NO SIGNAL"
-        confidence=max(call_score,put_score)
+        signal = "NO SIGNAL"
+        confidence = max(call_score, put_score)
 
     # TREND
-    if ema9>ema21:
-        trend="BULLISH"
+    if ema9 > ema21:
+        trend = "BULLISH"
 
-    elif ema9<ema21:
-        trend="BEARISH"
+    elif ema9 < ema21:
+        trend = "BEARISH"
 
     else:
-        trend="NEUTRAL"
+        trend = "NEUTRAL"
 
     return {
-        "signal":signal,
-        "confidence":confidence,
-        "price":price,
-        "rsi":rsi,
-        "ema9":ema9,
-        "ema21":ema21,
-        "atr":atr,
-        "trend":trend,
-        "reasons":reasons
+        "signal": signal,
+        "confidence": confidence,
+        "price": price,
+        "rsi": rsi,
+        "ema9": ema9,
+        "ema21": ema21,
+        "atr": atr,
+        "trend": trend,
+        "reasons": reasons
     }
-
 
 # ============================================================
 # LOGO
 # ============================================================
 
-logo_path="jutt_bot_logo.png"
+logo_path = "jutt_bot_logo.png"
 
 if os.path.exists(logo_path):
 
-    with open(logo_path,"rb") as f:
+    with open(logo_path, "rb") as f:
 
-        logo_b64=base64.b64encode(
+        logo_b64 = base64.b64encode(
             f.read()
         ).decode()
 
-    logo_html=f"""
+    logo_html = f"""
     <img src="data:image/png;base64,{logo_b64}">
     """
 
 else:
 
-    logo_html="""
+    logo_html = """
     <div style="
         color:#ffd338;
-        font-size:45px;
+        font-size:60px;
         font-weight:900;
-        text-align:center;
     ">
         ⭐
     </div>
     """
 
-
 # ============================================================
 # HEADER
 # ============================================================
 
-clock=datetime.now().strftime("%I:%M:%S %p")
+clock = datetime.now().strftime("%I:%M:%S %p")
 
-st.markdown(f"""
-
+html(f"""
 <div class="hero">
 
     <div class="hero-grid">
@@ -821,15 +694,11 @@ st.markdown(f"""
             </div>
 
             <div class="brand-tag">
-                ANALYZE &nbsp;|&nbsp;
-                SIGNAL &nbsp;|&nbsp;
-                TRADE &nbsp;|&nbsp;
-                GROW
+                ANALYZE | SIGNAL | TRADE | GROW
             </div>
 
             <div class="brand-sub">
-                DISCIPLINE TODAY &nbsp; • &nbsp;
-                BIGGER TOMORROW
+                DISCIPLINE TODAY • BIGGER TOMORROW
             </div>
 
         </div>
@@ -850,64 +719,54 @@ st.markdown(f"""
     </div>
 
 </div>
-
-""",unsafe_allow_html=True)
-
+""")
 
 # ============================================================
 # CONTROLS
 # ============================================================
 
-st.markdown(
-    '<div class="panel">',
-    unsafe_allow_html=True
-)
+html('<div class="panel">')
 
-c1,c2=st.columns(2)
+c1, c2 = st.columns(2)
 
 with c1:
 
-    pair=st.selectbox(
+    pair = st.selectbox(
         "📊 Pair / Asset",
         PAIRS,
-        format_func=lambda x:PAIR_NAMES[x]
+        format_func=lambda x: PAIR_NAMES[x]
     )
 
 with c2:
 
-    timeframe_name=st.selectbox(
-        "⏳ Expiry Time",
+    timeframe_name = st.selectbox(
+        "⏳ Timeframe",
         list(TIMEFRAMES.keys())
     )
 
-timeframe=TIMEFRAMES[timeframe_name]
+timeframe = TIMEFRAMES[timeframe_name]
 
-generate=st.button(
+generate = st.button(
     "⚡ GENERATE AI SIGNAL",
     use_container_width=True
 )
 
-st.markdown(
-    '</div>',
-    unsafe_allow_html=True
-)
-
+html('</div>')
 
 # ============================================================
-# MARKET DATA
+# GET LIVE DATA
 # ============================================================
 
-live_price=get_live_price(pair)
+live_price = get_live_price(pair)
 
-change,change_percent=get_24h(pair)
+change, change_percent = get_24h(pair)
 
-df=get_candles(
+df = get_candles(
     pair,
     timeframe
 )
 
-analysis=analyze_market(df)
-
+analysis = analyze_market(df)
 
 # ============================================================
 # METRICS
@@ -915,32 +774,29 @@ analysis=analyze_market(df)
 
 if analysis:
 
-    rsi=analysis["rsi"]
-    trend=analysis["trend"]
+    rsi = analysis["rsi"]
+    trend = analysis["trend"]
 
 else:
 
-    rsi=0
-    trend="OFFLINE"
+    rsi = 0
+    trend = "OFFLINE"
 
-connected=(
+connected = (
     live_price is not None
     and not df.empty
 )
 
-m1,m2,m3,m4=st.columns(4)
-
+m1, m2, m3, m4 = st.columns(4)
 
 # LIVE FEED
 
 with m1:
 
-    status="CONNECTED" if connected else "OFFLINE"
+    status = "CONNECTED" if connected else "OFFLINE"
+    cls = "green" if connected else "red"
 
-    cls="green" if connected else "red"
-
-    st.markdown(f"""
-
+    html(f"""
     <div class="metric-card">
 
         <div class="metric-title">
@@ -952,24 +808,25 @@ with m1:
         </div>
 
     </div>
+    """)
 
-    """,unsafe_allow_html=True)
-
-
-# PRICE
+# LIVE PRICE
 
 with m2:
 
-    price_text=(
+    price_text = (
         f"${live_price:,.2f}"
         if live_price is not None
         else "--"
     )
 
-    change_cls="green" if change_percent>=0 else "red"
+    change_cls = (
+        "green"
+        if change_percent >= 0
+        else "red"
+    )
 
-    st.markdown(f"""
-
+    html(f"""
     <div class="metric-card">
 
         <div class="metric-title">
@@ -981,22 +838,17 @@ with m2:
         </div>
 
         <div class="{change_cls}">
-            {change:+,.2f}
-            &nbsp;
-            ({change_percent:+.2f}%)
+            {change:+,.2f} ({change_percent:+.2f}%)
         </div>
 
     </div>
-
-    """,unsafe_allow_html=True)
-
+    """)
 
 # RSI
 
 with m3:
 
-    st.markdown(f"""
-
+    html(f"""
     <div class="metric-card">
 
         <div class="metric-title">
@@ -1008,40 +860,25 @@ with m3:
         </div>
 
     </div>
-
-    """,unsafe_allow_html=True)
-
+    """)
 
 # TREND
 
 with m4:
 
-    if trend=="BULLISH":
+    if trend == "BULLISH":
 
-        trend_html="""
-        <span class="green">
-            BULLISH 🟢
-        </span>
-        """
+        trend_html = '<span class="green">BULLISH 🟢</span>'
 
-    elif trend=="BEARISH":
+    elif trend == "BEARISH":
 
-        trend_html="""
-        <span class="red">
-            BEARISH 🔴
-        </span>
-        """
+        trend_html = '<span class="red">BEARISH 🔴</span>'
 
     else:
 
-        trend_html="""
-        <span class="yellow">
-            NEUTRAL 🟡
-        </span>
-        """
+        trend_html = '<span class="yellow">NEUTRAL 🟡</span>'
 
-    st.markdown(f"""
-
+    html(f"""
     <div class="metric-card">
 
         <div class="metric-title">
@@ -1053,9 +890,7 @@ with m4:
         </div>
 
     </div>
-
-    """,unsafe_allow_html=True)
-
+    """)
 
 # ============================================================
 # GENERATE SIGNAL
@@ -1065,9 +900,9 @@ if generate:
 
     if analysis:
 
-        st.session_state["signal_data"]=analysis
-        st.session_state["signal_pair"]=pair
-        st.session_state["signal_tf"]=timeframe
+        st.session_state["signal_data"] = analysis
+        st.session_state["signal_pair"] = pair
+        st.session_state["signal_tf"] = timeframe
 
     else:
 
@@ -1075,8 +910,7 @@ if generate:
             "Binance live market data is unavailable."
         )
 
-
-signal_data=st.session_state.get(
+signal_data = st.session_state.get(
     "signal_data"
 )
 
@@ -1088,54 +922,47 @@ if signal_data:
         st.session_state.get("signal_tf") != timeframe
     ):
 
-        signal_data=None
-
+        signal_data = None
 
 # ============================================================
-# SIGNAL CARD
+# SIGNAL
 # ============================================================
 
 if signal_data:
 
-    signal=signal_data["signal"]
+    signal = signal_data["signal"]
 
-    entry=(
+    entry = (
         live_price
         if live_price is not None
         else signal_data["price"]
     )
 
-    confidence=signal_data["confidence"]
+    confidence = signal_data["confidence"]
 
-    atr=signal_data["atr"]
+    atr = signal_data["atr"]
 
+    if signal == "CALL":
 
-    if signal=="CALL":
+        sl = entry - (1.5 * atr)
+        tp = entry + (2.5 * atr)
 
-        sl=entry-(1.5*atr)
-        tp=entry+(2.5*atr)
-
-        st.markdown(f"""
-
+        html(f"""
         <div class="signal-call">
 
             <div class="signal-title">
-                ▲ CALL ▲
-                [ {pair} — UP / HIGHER ]
+                ▲ CALL ▲ [ {pair} — UP / HIGHER ]
             </div>
 
             <div class="signal-sub">
-                Technical Signal Strength:
-                {confidence}%
-                &nbsp; | &nbsp;
-                Timeframe: {timeframe_name}
+                Technical Signal Strength: {confidence}%
+                | Timeframe: {timeframe_name}
             </div>
 
         </div>
+        """)
 
-        """,unsafe_allow_html=True)
-
-        a,b,c=st.columns(3)
+        a, b, c = st.columns(3)
 
         with a:
             st.metric(
@@ -1155,33 +982,27 @@ if signal_data:
                 f"{tp:,.2f}"
             )
 
+    elif signal == "PUT":
 
-    elif signal=="PUT":
+        sl = entry + (1.5 * atr)
+        tp = entry - (2.5 * atr)
 
-        sl=entry+(1.5*atr)
-        tp=entry-(2.5*atr)
-
-        st.markdown(f"""
-
+        html(f"""
         <div class="signal-put">
 
             <div class="signal-title">
-                ▼ PUT ▼
-                [ {pair} — DOWN / LOWER ]
+                ▼ PUT ▼ [ {pair} — DOWN / LOWER ]
             </div>
 
             <div class="signal-sub">
-                Technical Signal Strength:
-                {confidence}%
-                &nbsp; | &nbsp;
-                Timeframe: {timeframe_name}
+                Technical Signal Strength: {confidence}%
+                | Timeframe: {timeframe_name}
             </div>
 
         </div>
+        """)
 
-        """,unsafe_allow_html=True)
-
-        a,b,c=st.columns(3)
+        a, b, c = st.columns(3)
 
         with a:
             st.metric(
@@ -1201,11 +1022,9 @@ if signal_data:
                 f"{tp:,.2f}"
             )
 
-
     else:
 
-        st.markdown(f"""
-
+        html(f"""
         <div class="signal-neutral">
 
             <div class="signal-title">
@@ -1217,14 +1036,11 @@ if signal_data:
             </div>
 
         </div>
-
-        """,unsafe_allow_html=True)
-
+        """)
 
 else:
 
-    st.markdown(f"""
-
+    html(f"""
     <div class="signal-neutral">
 
         <div class="signal-title">
@@ -1232,14 +1048,11 @@ else:
         </div>
 
         <div class="signal-sub">
-            {pair} • {timeframe_name}
-            • Binance Live Market
+            {pair} • {timeframe_name} • Binance Live Market
         </div>
 
     </div>
-
-    """,unsafe_allow_html=True)
-
+    """)
 
 # ============================================================
 # LIVE CHART
@@ -1247,210 +1060,151 @@ else:
 
 if not df.empty:
 
-    chart_df=df.tail(80).copy()
+    chart_df = df.tail(80).copy()
 
-    candle_data=[]
+    candle_data = []
+    volume_data = []
 
-    volume_data=[]
-
-    for _,row in chart_df.iterrows():
+    for _, row in chart_df.iterrows():
 
         candle_data.append({
-
-            "time":int(row["time"]/1000),
-
-            "open":float(row["open"]),
-
-            "high":float(row["high"]),
-
-            "low":float(row["low"]),
-
-            "close":float(row["close"])
-
+            "time": int(row["time"] / 1000),
+            "open": float(row["open"]),
+            "high": float(row["high"]),
+            "low": float(row["low"]),
+            "close": float(row["close"])
         })
 
         volume_data.append({
-
-            "time":int(row["time"]/1000),
-
-            "value":float(row["volume"]),
-
+            "time": int(row["time"] / 1000),
+            "value": float(row["volume"]),
             "color":
-            "#16c784"
-            if row["close"]>=row["open"]
-            else "#ef4056"
-
+                "#16c784"
+                if row["close"] >= row["open"]
+                else "#ef4056"
         })
 
-    candle_json=json.dumps(candle_data)
+    candle_json = json.dumps(candle_data)
+    volume_json = json.dumps(volume_data)
 
-    volume_json=json.dumps(volume_data)
-
-    chart_html=f"""
-
+    chart_html = f"""
     <div class="chart-panel">
 
         <div class="chart-heading">
-            ₿ {pair} • {timeframe_name}
-            • Binance Live Market
+            ₿ {pair} • {timeframe_name} • Binance Live Market
         </div>
 
         <div id="chart"
-             style="width:100%;height:470px;">
+             style="width:100%;height:455px;">
         </div>
 
     </div>
 
-    <script src="
-    https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.min.js
-    "></script>
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.min.js"></script>
 
     <script>
 
-    const candleData={candle_json};
+    const candleData = {candle_json};
+    const volumeData = {volume_json};
 
-    const volumeData={volume_json};
+    const container = document.getElementById("chart");
 
-    const container=
-        document.getElementById("chart");
+    const chart = LightweightCharts.createChart(
+        container,
+        {{
+            width: container.clientWidth,
+            height: 445,
 
-    const chart=
-        LightweightCharts.createChart(
-            container,
-            {{
+            layout: {{
+                background: {{ color: "#080d12" }},
+                textColor: "#aab4bf"
+            }},
 
-                width:container.clientWidth,
+            grid: {{
+                vertLines: {{ color: "#182128" }},
+                horzLines: {{ color: "#182128" }}
+            }},
 
-                height:455,
+            rightPriceScale: {{
+                borderColor: "#34414b"
+            }},
 
-                layout:{{
-                    background:{{color:"#080d12"}},
-                    textColor:"#aab4bf"
-                }},
-
-                grid:{{
-                    vertLines:{{color:"#182128"}},
-                    horzLines:{{color:"#182128"}}
-                }},
-
-                rightPriceScale:{{
-                    borderColor:"#34414b"
-                }},
-
-                timeScale:{{
-                    borderColor:"#34414b",
-                    timeVisible:true,
-                    secondsVisible:false
-                }}
-
+            timeScale: {{
+                borderColor: "#34414b",
+                timeVisible: true,
+                secondsVisible: false
             }}
-        );
+        }}
+    );
 
-    const candles=
-        chart.addCandlestickSeries({{
-
-            upColor:"#16c784",
-
-            downColor:"#ef4056",
-
-            borderUpColor:"#16c784",
-
-            borderDownColor:"#ef4056",
-
-            wickUpColor:"#16c784",
-
-            wickDownColor:"#ef4056"
-
-        }});
+    const candles = chart.addCandlestickSeries({{
+        upColor: "#16c784",
+        downColor: "#ef4056",
+        borderUpColor: "#16c784",
+        borderDownColor: "#ef4056",
+        wickUpColor: "#16c784",
+        wickDownColor: "#ef4056"
+    }});
 
     candles.setData(candleData);
 
-
-    const volume=
-        chart.addHistogramSeries({{
-
-            priceFormat:{{
-                type:"volume"
-            }},
-
-            priceScaleId:""
-
-        }});
-
-
-    volume.priceScale().applyOptions({{
-
-        scaleMargins:{{
-            top:0.78,
-            bottom:0
-        }}
-
+    const volume = chart.addHistogramSeries({{
+        priceFormat: {{
+            type: "volume"
+        }},
+        priceScaleId: ""
     }});
 
+    volume.priceScale().applyOptions({{
+        scaleMargins: {{
+            top: 0.78,
+            bottom: 0
+        }}
+    }});
 
     volume.setData(volumeData);
 
     chart.timeScale().fitContent();
 
-
-    window.addEventListener(
-        "resize",
-        function(){{
-            chart.applyOptions({{
-                width:container.clientWidth
-            }});
-        }}
-    );
+    window.addEventListener("resize", function() {{
+        chart.applyOptions({{
+            width: container.clientWidth
+        }});
+    }});
 
     </script>
-
     """
 
     st.components.v1.html(
         chart_html,
-        height=485,
+        height=475,
         scrolling=False
     )
-
 
 # ============================================================
 # RECENT SIGNALS
 # ============================================================
 
-st.markdown(
-    '<div class="panel">',
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    '<div class="recent-title">📋 RECENT SIGNALS</div>',
-    unsafe_allow_html=True
-)
+html("""
+<div class="panel">
+    <div class="recent-title">
+        📋 RECENT SIGNALS
+    </div>
+</div>
+""")
 
 if "recent_signals" not in st.session_state:
 
-    st.session_state.recent_signals=[]
-
+    st.session_state.recent_signals = []
 
 if generate and signal_data:
 
-    new_signal={
-
-        "TIME":
-        datetime.now().strftime("%H:%M:%S"),
-
-        "PAIR":
-        pair,
-
-        "SIGNAL":
-        signal_data["signal"],
-
-        "PRICE":
-        signal_data["price"],
-
-        "STRENGTH":
-        f"{signal_data['confidence']}%"
-
+    new_signal = {
+        "TIME": datetime.now().strftime("%H:%M:%S"),
+        "PAIR": pair,
+        "SIGNAL": signal_data["signal"],
+        "PRICE": signal_data["price"],
+        "STRENGTH": f"{signal_data['confidence']}%"
     }
 
     st.session_state.recent_signals.insert(
@@ -1458,13 +1212,12 @@ if generate and signal_data:
         new_signal
     )
 
-    st.session_state.recent_signals=\
+    st.session_state.recent_signals = \
         st.session_state.recent_signals[:10]
-
 
 if st.session_state.recent_signals:
 
-    recent_df=pd.DataFrame(
+    recent_df = pd.DataFrame(
         st.session_state.recent_signals
     )
 
@@ -1476,15 +1229,7 @@ if st.session_state.recent_signals:
 
 else:
 
-    st.info(
-        "No signals generated yet."
-    )
-
-st.markdown(
-    '</div>',
-    unsafe_allow_html=True
-)
-
+    st.info("No signals generated yet.")
 
 # ============================================================
 # TECHNICAL ANALYSIS
@@ -1492,21 +1237,17 @@ st.markdown(
 
 if analysis:
 
-    st.markdown(
-        '<div class="panel">',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        "### 🧠 JUTT BOT TECHNICAL ANALYSIS"
-    )
+    html("""
+    <div class="panel">
+        <div class="recent-title">
+            🧠 JUTT BOT TECHNICAL ANALYSIS
+        </div>
+    </div>
+    """)
 
     for reason in analysis["reasons"]:
 
-        st.write(
-            "•",
-            reason
-        )
+        st.write("•", reason)
 
     st.write(
         f"EMA 9: `{analysis['ema9']:.6f}`  |  "
@@ -1514,18 +1255,12 @@ if analysis:
         f"ATR: `{analysis['atr']:.6f}`"
     )
 
-    st.markdown(
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-
 # ============================================================
 # FOOTER
 # ============================================================
 
-st.markdown("""
+html("""
 <div class="footer">
     JUTT BOT PRO • ANALYZE | SIGNAL | TRADE | GROW
 </div>
-""", unsafe_allow_html=True)
+""")
