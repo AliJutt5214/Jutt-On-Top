@@ -6,7 +6,6 @@ import os
 import base64
 import textwrap
 from datetime import datetime
-from streamlit_autorefresh import st_autorefresh
 from ta.momentum import RSIIndicator
 from ta.trend import EMAIndicator
 from ta.volatility import AverageTrueRange
@@ -21,9 +20,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
-
-# Auto refresh every 2 seconds for live clock & real-time feel
-st_autorefresh(interval=2000, key="jutt_live_timer")
 
 # ============================================================
 # HTML RENDER FIX
