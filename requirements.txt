@@ -1,4 +1,1 @@
-streamlit
-pandas
-requests
-ta
+pip install ta pandas requests streamlit
