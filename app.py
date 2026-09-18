@@ -411,7 +411,7 @@ if generate:
         st.session_state["signal_tf"] = timeframe
 
 sig_data = st.session_state.get("signal_data")
-if sig_data and (st.session_state.get("signal_pair"] != pair or st.session_state.get("signal_tf") != timeframe):
+if sig_data and (st.session_state.get("signal_pair"] != pair or st.session_state.get("signal_tf"] != timeframe):
     sig_data = None
 
 clean_pair_name = pair.replace("USDT", " / USDT")
