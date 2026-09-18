@@ -89,9 +89,9 @@ header, footer, #MainMenu, [data-testid="stToolbar"], [data-testid="stStatusWidg
 }
 
 .logo-img {
-    width: 45px;
-    height: 45px;
-    object-fit: contain;
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
     border-radius: 10px;
     border: 2px solid #ffd338;
 }
@@ -253,8 +253,12 @@ TV_SYMBOLS = {
 }
 
 TIMEFRAMES = {
-    "1 Minute (1m)": "1m", "3 Minutes (3m)": "3m", "5 Minutes (5m)": "5m",
-    "15 Minutes (15m)": "15m", "30 Minutes (30m)": "30m", "1 Hour (1h)": "1h"
+    "1 Minute (1m)": {"code": "1m", "seconds": 60},
+    "3 Minutes (3m)": {"code": "3m", "seconds": 180},
+    "5 Minutes (5m)": {"code": "5m", "seconds": 300},
+    "15 Minutes (15m)": {"code": "15m", "seconds": 900},
+    "30 Minutes (30m)": {"code": "30m", "seconds": 1800},
+    "1 Hour (1h)": {"code": "1h", "seconds": 3600}
 }
 
 # ============================================================
@@ -320,7 +324,7 @@ def analyze_market(df):
     return {"signal": signal, "confidence": conf, "price": price, "rsi": rsi, "atr": atr, "trend": trend}
 
 # ============================================================
-# LIVE HEADER & OFFICIAL GOLDEN LOGO
+# LIVE HEADER & EXACT LOGO SETUP
 # ============================================================
 
 logo_path = "jutt_bot_logo.png"
@@ -330,8 +334,6 @@ if os.path.exists(logo_path):
     logo_img_tag = f'<img src="data:image/png;base64,{logo_b64}" class="logo-img">'
 else:
     logo_img_tag = '<span style="font-size:28px;">⭐</span>'
-
-current_time_str = datetime.now().strftime("%I:%M:%S %p").lower()
 
 html(f"""
 <div class="main-title">
@@ -347,18 +349,19 @@ html(f"""
             <div class="brand-sub-sm">PRO TRADER</div>
         </div>
     </div>
-    <div class="time-text">{current_time_str}</div>
+    <div class="time-text" id="live-clock">Loading...</div>
 </div>
 """)
 
 # ============================================================
-# CONTROLS PANEL (BINANCE PAIRS & EXPIRY TIMEFRAMES)
+# CONTROLS PANEL
 # ============================================================
 
 html('<div class="panel">')
 pair = st.selectbox("Pair / Asset", PAIRS, format_func=lambda x: PAIR_NAMES[x])
 expiry_name = st.selectbox("Expiry Time / Candle Interval", list(TIMEFRAMES.keys()))
-timeframe = TIMEFRAMES[expiry_name]
+timeframe = TIMEFRAMES[expiry_name]["code"]
+expiry_seconds = TIMEFRAMES[expiry_name]["seconds"]
 generate = st.button("⚡ GENERATE AI SIGNAL")
 html('</div>')
 
@@ -369,15 +372,77 @@ connected = not df.empty
 rsi_val = analysis["rsi"] if analysis else 50.0
 trend_val = analysis["trend"] if analysis else "BULLISH"
 
-# Signal Expiry Timer Bar
-html(f"""
+# Handle Generation State & Expiry Timestamp
+if generate:
+    if analysis:
+        st.session_state["signal_data"] = analysis
+        st.session_state["signal_pair"] = pair
+        st.session_state["signal_tf"] = timeframe
+        import time
+        st.session_state["expiry_target_timestamp"] = int(time.time()) + expiry_seconds
+
+sig_data = st.session_state.get("signal_data")
+if sig_data and (st.session_state.get("signal_pair") != pair or st.session_state.get("signal_tf") != timeframe):
+    sig_data = None
+    st.session_state.pop("signal_data", None)
+    st.session_state.pop("expiry_target_timestamp", None)
+
+target_ts = st.session_state.get("expiry_target_timestamp", 0)
+
+# Real-Time JavaScript Clock & Live Countdown Timer Component
+js_timer_code = f"""
 <div class="timer-box">
     <span>Signal Expiry Timer</span>
-    <span class="timer-val">EXPIRY: READY</span>
+    <span class="timer-val" id="countdown-timer">EXPIRY: READY</span>
 </div>
-""")
 
-# Metrics Row (Live Feed, RSI, Trend)
+<script>
+// Live Clock
+function updateClock() {{
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const strTime = String(hours).padStart(2, '0') + ':' + minutes + ':' + seconds + ' ' + ampm;
+    const clockEl = document.getElementById('live-clock');
+    if (clockEl) clockEl.innerText = strTime;
+}}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Live Expiry Countdown Timer
+const targetTime = {target_ts};
+function updateCountdown() {{
+    const timerEl = document.getElementById('countdown-timer');
+    if (!timerEl) return;
+    
+    if (!targetTime || targetTime === 0) {{
+        timerEl.innerText = "EXPIRY: READY";
+        return;
+    }}
+    
+    const nowSec = Math.floor(Date.now() / 1000);
+    const diff = targetTime - nowSec;
+    
+    if (diff <= 0) {{
+        timerEl.innerText = "EXPIRED / READY";
+    }} else {{
+        const m = Math.floor(diff / 60);
+        const s = diff % 60;
+        timerEl.innerText = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0') + " REMAINING";
+    }}
+}}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+</script>
+"""
+
+html(js_timer_code)
+
+# Metrics Row
 feed_status_class = "green" if connected else "red"
 feed_status_text = "CONNECTED" if connected else "OFFLINE"
 trend_display = '<span class="green">BULLISH 🟢</span>' if trend_val == "BULLISH" else '<span class="red">BEARISH 🔴</span>'
@@ -398,17 +463,6 @@ html(f"""
     </div>
 </div>
 """)
-
-# Handle Generation State
-if generate:
-    if analysis:
-        st.session_state["signal_data"] = analysis
-        st.session_state["signal_pair"] = pair
-        st.session_state["signal_tf"] = timeframe
-
-sig_data = st.session_state.get("signal_data")
-if sig_data and (st.session_state.get("signal_pair") != pair or st.session_state.get("signal_tf") != timeframe):
-    sig_data = None
 
 clean_pair_name = pair.replace("USDT", " / USDT")
 
@@ -438,7 +492,7 @@ else:
     """)
 
 # ============================================================
-# TRADINGVIEW LIVE CHART WIDGET (At the Bottom)
+# TRADINGVIEW LIVE CHART WIDGET
 # ============================================================
 
 tv_symbol = TV_SYMBOLS.get(pair, "BINANCE:BTCUSDT")
